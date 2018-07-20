@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd                          http://camel.apache.org/schema/spring       http://camel.apache.org/schema/spring/camel-spring.xsd">
+    <!-- Camel Routes -->
+    <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
+        <route id="main" streamCache="true">
+            <!-- <from id="route-timer" uri="timer:order?period=1000"/>
+            <setBody>
+	                <simple>Hello sunshine at ${header.firedTime}</simple>
+	        </setBody> -->
+            <from id="main-input" uri="amqp:input.queue?exchangePattern=InOnly"/>
+            <log id="main-log-begin" message="Message received"/>
+            <bean id="main-process" method="process" ref="loadSimulator"/>
+            <to id="main-log-end1" uri="log:org.fgiloux.camel.amq.testapp?showHeaders=true&amp;showProperties=true"/>
+            <log id="main-log-end2" message="Exchange ${exchange} processed"/>
+            <to id="main-output" uri="amqp:output.queue"/>
+        </route>
+    </camelContext>
+</beans>
