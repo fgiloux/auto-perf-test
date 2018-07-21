@@ -27,7 +27,7 @@ ENV JMETER_HOME $JMETER_BASE/apache-jmeter-4.0
 ENV PATH $JMETER_HOME/bin:$PATH
 
 # Additional jars (ex. AMQP driver) can be copied into $JMETER_HOME/lib
-# COPY lib/* $JMETER_HOME/lib
+COPY lib/* $JMETER_HOME/lib/
 
 # Copy custom user.properties file for reports dashboard to be generated
 # COPY user.properties $JMETER_HOME/bin/user.properties

@@ -1,9 +1,8 @@
 #!/bin/bash
 
 # Runs tests from JMX file, creates results file and reports dashboard
-# I need to build a loop!!!
-for TEST_FILE in $JMETER_BASE/tests/*.jmx
-    RESULT_FILE = $JMETER_BASE/results/$(basename $TEST_FILE .jmx).jtl
+for TEST_FILE in $JMETER_BASE/tests/*.jmx; do
+    RESULT_FILE=$JMETER_BASE/results/$(basename $TEST_FILE .jmx)_$(date +"%F_%T").jtl
     $JMETER_HOME/bin/jmeter -n -t $TEST_FILE -l $RESULT_FILE
     # Print results file
     cat $RESULT_FILE
