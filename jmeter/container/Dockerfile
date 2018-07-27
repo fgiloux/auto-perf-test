@@ -2,9 +2,6 @@ FROM fabric8/java-centos-openjdk8-jdk:1.4
 MAINTAINER Frédéric Giloux
 LABEL jmeter.version="4.0"
 
-############## DO I NEED TO CHANGE USER?
-
-
 # Set JMeter base
 ENV JMETER_BASE /opt/jmeter
 
