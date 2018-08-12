@@ -12,7 +12,7 @@ endif::[]
 :toc:
 :toc-placement!:
 
-This page contains the instructions to set up and configure https://github.com/EnMasseProject/enmasse[EnMasse] for the purpose of the performance tests that are demonstrated in this project. Nothing prevents you to use a different message broker, EnMasse is however a perfect fit for test automation as it is possible to get shared or dedicated brokers provisioned on demand and running on OpenShift/Kubernetes.
+This page contains the instructions to set up and configure https://github.com/EnMasseProject/enmasse[EnMasse] for the purpose of the performance tests that are demonstrated in this project. Nothing prevents you to use a different messaging broker, EnMasse is however a perfect fit for test automation as it is possible to get shared or dedicated brokers provisioned on demand and running on OpenShift/Kubernetes.
 
 == Deployment
 
@@ -20,12 +20,12 @@ The deployment is pretty straightforward. I used what was the current release at
 Once you have cloned the repository you can follow the http://enmasse.io/documentation/0.19.0/[instructions] to deploy EnMasse. In short the following will have the user admin deploying the EnMasse components in the perftest project using provided ansible playbook:
 [source,bash]
 ----
-$ ./deploy-openshift.sh -n perftest -u admin
+$ ./enmasse-0.19.0/deploy-openshift.sh -n perftest -u admin
 ----
 
 A route then gets created for you, which provides access to the EnMasse console.
 
-By selecting the Addresses menu on the left and clicking on the Create button on the top it is possible to create a queue. For the purpose of this demo you will need to create two queues: input.queue and output.queue as pooled queues.
+By selecting the Addresses menu on the left and clicking on the Create button on the top it is possible to create a queue. For the purpose of this demo you will need to create two queues: *input.queue* and *output.queue* as pooled queues.
 
 == Certificates
 
@@ -34,5 +34,5 @@ Extracting the certificate that will be used to connect to the broker and import
 ----
 $ mkdir amqp-certs
 $ oc extract secret/external-certs-messaging --to=amqp-certs
-$ keytool -v -import -file amqp-certs/tls.crt -alias cacrt -keystore amqp.jks
+$ keytool -v -import -file amqp-certs/tls.crt -alias cacrt -keystore amqp-certs/amqp.jks
 ----
