@@ -1,0 +1,44 @@
+= JMeter overview
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+ifndef::env-github[]
+:imagesdir: ./
+endif::[]
+:toc:
+:toc-placement!:
+
+This sub-repository aims to describe the setup required for using JMeter on OpenShift, from the creation of a JMeter image to its use for running test plans in non-GUI mode.
+
+[WARNING]
+====
+TODO: Test result dashboard and analysis
+====
+
+== Design time
+
+The recommended approach is to use JMeter GUI for designing your test plan. You may have installed it on your machine or you may run it on OpenShift, although this part has not yet been covered here. Running the test plan should however be done in non-GUI mode for better performance. OpenShift is best suited for this step.
+// To run JMeter in GUI mode it should be started with the required parameter, a route should be created so that it is externally accessible. Extraction of the jmx file should also be documented.
+
+Using JMeter GUI for the design phase provides a quick feedback loop. The test plan can then be tweaked till it is deemed ready and can be added to the continuous integration pipeline.
+
+== Orchestration
+
+Although the test plan can be manually run on OpenShift the idea is to get that automated by a tool for continuous integration. This will enable running non-regression tests that also cover performance aspects every time a new version is pushed to the central repository or nightly if resources are constrained during the day. We have used Jenkins for demonstrating how it can be done.
+
+[WARNING]
+====
+TODO: Add link to the Jenkins chapter
+====
+
+== Next
+
+See the following chapters for details:
+
+* <<./container/README.adoc#,Image creation>>
+* <<./openshift/README.adoc#,Deployment on OpenShift>>
+* <<./examples/README.adoc#,Test examples>>

@@ -1,0 +1,62 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  labels:
+    app: apt-jmeter
+  name: apt-jmeter-job
+objects:
+  - apiVersion: batch/v1
+    kind: Job
+    metadata:
+      labels:
+        app: apt-jmeter
+      name: apt-jmeter
+    spec:
+      parallelism: 1
+      completions: 1
+      template:
+        metadata:
+          name: apt-jmeter
+        spec:
+          containers:
+          - name: jmeter
+            image: docker-registry.default.svc:5000/${NAMESPACE}/apt-jmeter:latest
+            resources:
+              requests:
+                cpu: '500m'
+                memory: 1Gi
+            env:
+              - name: J_JKS_PWD
+                valueFrom:
+                  secretKeyRef:
+                    name: ${JKS_SECRET}
+                    key: JKS_PWD
+            volumeMounts:
+              - mountPath: /opt/jmeter/tests
+                name: tests
+              - mountPath: /opt/jmeter/results
+                name: results
+              - mountPath: /opt/certificates
+                name: jks
+          restartPolicy: OnFailure
+          volumes:
+            - name: results
+              emptyDir: {}
+            - configMap:
+                defaultMode: 420
+                name: ${JMX_CONFIGMAP}
+              name: tests
+            - name: jks
+              secret:
+                defaultMode: 420
+                secretName: ${JKS_SECRET}
+parameters:
+  - description: Namespace/project the job is created in
+    name: NAMESPACE
+    value: perftest
+  - description: Name of the ConfigMap containing the test(s) to run
+    name: JMX_CONFIGMAP
+    value: apt-jmx
+  - description: Name of the secret containing the jks
+    name: JKS_SECRET
+    value: broker-jks

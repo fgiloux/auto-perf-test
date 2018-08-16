@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ImageStream
+metadata:
+  annotations:
+    openshift.io/generated-by: OpenShiftNewApp
+    openshift.io/image.dockerRepositoryCheck: 2018-07-20T09:40:15Z
+  creationTimestamp: null
+  generation: 2
+  labels:
+    app: apt-jmeter
+  name: java-centos-openjdk8-jdk
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+  - annotations:
+      openshift.io/imported-from: fabric8/java-centos-openjdk8-jdk:1.4
+    from:
+      kind: DockerImage
+      name: docker-registry.default.svc:5000/perftest/java-centos-openjdk8-jdk:1.4
+    generation: 2
+    importPolicy: {}
+    name: "1.4"
+    referencePolicy:
+      type: Source
+status:
+  dockerImageRepository: ""

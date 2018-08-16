@@ -1,0 +1,39 @@
+= JMeter overview
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+ifndef::env-github[]
+:imagesdir: ./
+endif::[]
+:toc:
+:toc-placement!:
+
+An exemple of a test plan is provided in this directory. The plan allows to send messages to a broker (see <<../../enmasse/README.adoc#,EnMasse>>. The messages are then consumed by an application and put into an output queue.
+
+[TIP]
+====
+To communicate with the AMQP broker the following libraries need to be added to the lib directory for JMeter to be able to establish a connection to the AMQP broker.
+
+* org.apache.qpid proton-j-0.16.0.jar
+* org.apache.qpid qpid-jms-client-0.11.1.jar
+* artemis-jms-client-all-2.6.1.jar
+====
+
+== Design
+
+JMeter can be used in GUI mode to create or amend the test plan.
+
+[IMPORTANT]
+====
+Certificate location and password may be provided in the connection string. The certificate path may differ. The jks password is injected through an environment variable. This needs to be taken in consideration in the jmx file that is mounted through the configMap. Look at the provided test plan for an example. Note that the run.sh script called when the JMeter container is started transform the J_ to a start parameter with -J as expected by JMeter. For instance when the following environment variable is set: J_JKS_PWD=XXXXX JMeter gets called with -JJKS_PWD and makes possible to get the value in the test plan with ${__P(JKS_PWD)}.
+====
+
+== Run
+
+Once the test plan has been designed it can be run on OpenShift. Additional information here: <<../openshift/README.adoc#,OpenShift>>
+
+[the connection string looks now like: amqps://messaging-perftest.apps.sandbox.com:443?transport.trustStoreLocation=/opt/certificates/amqp.jks&amp;transport.trustStorePassword=${__P(JKS_PWD)}&amp;transport.verifyHost=false]

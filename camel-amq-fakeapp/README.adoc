@@ -1,0 +1,97 @@
+= Fake messaging app used for demo
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+ifndef::env-github[]
+:imagesdir: ./
+endif::[]
+:toc:
+:toc-placement!:
+
+This app consumes and sends messages through a broker. https://github.com/EnMasseProject/enmasse[EnMasse] is used for the purpose of the performance tests that are demonstrated in this project.
+
+Different response times can be simulated. The following parameters are configurable through a configMap and related to the processing of a single message.
+
+* load in fraction of CPU cores available (capped to 1)
+* duration in milliseconds
+* load deviation
+* duration deviation
+
+The distribution is normal/Gaussian:
+
+  Random.nextGaussian() x processing.duration.deviation + processing.duration
+
+If the processing duration is set to 50 a deviation of 10 means that 70% of values will fall between duration +/- 10, in other words between 40 and 60 milliseconds.
+Choosing a value of 0 means no deviation and the duration or load is always the same.
+
+Failure injection may be added with a future version.
+
+== Build
+
+The container image can easily be build with the fabric8 build target, which uses the S2I strategy provided you are connected to OpenShift. Once you have cloned the git repository execute the following commands:
+
+ $ cd auto-perf-test/camel-amq-fakeapp
+ $ oc login
+ $ mvn fabric8:build
+
+== Deployment
+
+After the build a deployment configuration has been created under target/classes/META-INF/fabric8/openshift/camel-amq-fakeapp-deploymentconfig.yml and can be used to deploy the image with:
+
+ $ mvn fabric8:deploy
+
+However the fabric8 plugin does not support mounting a secret, which we will use to inject the broker certificates in the next section. The OpenShift object definitions have been stored under auto-perf-test/camel-amq-fakeapp/src/main/openshift and can be manually recreated with:
+
+ $ oc create -f $filename
+
+where $filename is to be replaced with the names of the files containing the object definition.
+
+== Certificates
+
+The certificate extraction and keystore creation has been documented in the EnMasse readme. The instructions are repeated here for convenience:
+
+[source,bash]
+----
+$ mkdir amqp-certs
+$ oc extract secret/external-certs-messaging --to=amqp-certs
+$ keytool -v -import -file amqp-certs/tls.crt -alias cacrt -keystore amqp-certs/amqp.jks
+----
+
+The next step is to create a secret containing the java keystore:
+
+[source,bash]
+----
+$ oc secrets new broker-jks amqp-certs/amqp.jks
+----
+
+The secret can then be mounted in the container by updating the deployment configuration with the following command. You won't need this step if you have used the deployment configuration definition file provided in the git repository.
+
+ $ oc set volume dc/camel-amq-fakeapp --add --name=broker-jks -m /opt/broker-jks -t secret --secret-name=broker-jks
+
+== Configuration externalisation
+
+You may have noted that the openshift directory in the git repository also contains a configMap. This configMap is used for externalising environment dependent properties that are injected into the Spring Boot application through application.properties. Defaults can be defined in the property file provided with the application archive (jar). Only properties whose values should be overwritten can be specified in the ConfigMap. This works as Spring Boot will privilege values defined externally to the ones defined in application.properties embedded in the jar. Here are the steps that have been used. Alternatively you can use the "oc create -f" command provided earlier.
+
+ $ oc create configmap camel-amq-fakeapp-props --from-env-file=src/main/resources/application.properties
+
+ application.properties is a streamlined version only including values that differ from the ones embedded in the jar.
+
+Mounting the configMap
+
+ $ oc set volume dc/camel-amq-fakeapp --add --name=app-properties -m /deployments/configuration -t configmap --configmap-name=camel-amq-fakeapp-props
+
+
+Updating the DC to make use of the new application.properties
+
+ $ oc set env dc/camel-amq-fakeapp SPRING_CONFIG_LOCATION='/deployments/configuration/application.properties'
+
+Another option instead of mounting an additional application.properties into the file system would be to inject the parameters from the configMap directly into the deployment configuration as environment variables. This would however requires a container restart to have new values made available to the application.
+
+[WARNING]
+====
+TODO: Sensitive information: amqp.username, amqp.password and amqp.options.transport.trustStorePassword should be moved from the application.properties and injected through environment variables provided by a secret
+====

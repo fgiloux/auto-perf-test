@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ImageStream
+metadata:
+  annotations:
+    openshift.io/generated-by: OpenShiftNewApp
+  creationTimestamp: null
+  generation: 1
+  labels:
+    app: apt-jmeter
+  name: apt-jmeter
+spec:
+  lookupPolicy:
+    local: false
+status:
+  dockerImageRepository: ""

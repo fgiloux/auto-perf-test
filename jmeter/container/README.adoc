@@ -1,0 +1,27 @@
+= JMeter overview
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+ifndef::env-github[]
+:imagesdir: ./
+endif::[]
+:toc:
+:toc-placement!:
+
+
+Building the JMeter image is pretty straightforward. 
+
+The build configuration and image stream can be generated with
+
+ $ oc new-build --binary=true --name=apt-jmeter
+
+A binary build using the Dockerfile and context can then be launched with
+
+ $ oc start-build apt-jmeter --from-dir=.
+
+Alternatively the object defintions for build configuration and image stream availabe at ../openshift can be used.
+

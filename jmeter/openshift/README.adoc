@@ -1,0 +1,47 @@
+= JMeter overview
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+ifndef::env-github[]
+:imagesdir: ./
+endif::[]
+:toc:
+:toc-placement!:
+
+
+After <<../container/README.adoc#,a JMeter image>> has been created you can run your test plan in a container. Therefore <<../examples/README.adoc#,an example>> has been provided, which is used for demonstrating the approach.
+The few generic steps are described here. The ones specific to the test plan provided as example are described there.
+
+== Test plan
+
+A configMap is used for injecting the test plan into the image. From the directory where your jmx file is located you can create the configMap with a single command.
+
+ $ oc create configmap apt-jmx --from-file=jms-p2p-example.jmx
+
+A label can also be added to the config
+
+ $ oc label configmap apt-jmx app=apt-jmeter
+
+== Certificates and credentials
+
+Very similar to the test plan certificates can be injected into the container. A secret may be used for this purpose rather than a configMap. A java keystore containing the broker certificates has been created in the <<../../enmasse/README.adoc#,EnMasse section>>. A password is also necessary to access the keystore and may be provided as environment variable. Both can be injected with a single secret running the following command in the same directory that was used for the creation of the java keystore.
+
+ $ oc create secret generic broker-jks --from-literal=J_JKS_PWD=xxxxxx --from-file=./amqp-certs/amqp.jks
+
+== Run
+
+As we want our test plan to be run and terminate at the end a job is better suited for the purpose than a deployment configuration. A template containing the job definition may also be used to pass parameters. An example is available in this directory. The template can be processed with this command to create a new job.
+
+ $ oc process -f apt-jmeter-job-tm.yaml | oc create -f -
+
+If you want to replace it with a new version you can use the follwing.
+
+ $ oc process -f apt-jmeter-job-tm.yaml | oc replace --force -f -
+
+It is possible to pass the namespace and name of configMap with the JMeter test suite as parameter.
+
+Another template apt-jmeter-job-persistent-tm.yaml allows to mount a persistent volume instead of emptyDir for storing the test results. An additional parameter allows the specification of the PVC name.
