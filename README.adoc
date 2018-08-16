@@ -1,4 +1,4 @@
-= JMeter overview
+= Overview
 ifdef::env-github[]
 :tip-caption: :bulb:
 :note-caption: :information_source:
