@@ -20,6 +20,8 @@ The deployment is pretty straightforward. I used what was the current release at
 Once you have cloned the repository you can follow the http://enmasse.io/documentation/0.19.0/[instructions] to deploy EnMasse. In short the following will have the user admin deploying the EnMasse components in the perftest project using provided ansible playbook:
 [source,bash]
 ----
+$ oc new-project perftest
+create a persitence volume as statefulset requires it,one can use the template provided here(oc create -f brokerpv.yaml )
 $ ./enmasse-0.19.0/deploy-openshift.sh -n perftest -u admin
 ----
 
