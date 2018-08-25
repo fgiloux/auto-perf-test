@@ -30,7 +30,7 @@ A label can also be added to the config
 
 Very similar to the test plan certificates can be injected into the container. A secret may be used for this purpose rather than a configMap. A java keystore containing the broker certificates has been created in the <<../../enmasse/README.adoc#,EnMasse section>>. A password is also necessary to access the keystore and may be provided as environment variable. Both can be injected with a single secret running the following command in the same directory that was used for the creation of the java keystore.
 
- $ oc create secret generic broker-jks --from-literal=J_JKS_PWD=xxxxxx --from-file=./amqp-certs/amqp.jks
+  $ oc create secret generic broker-jks --from-literal=JKS_PWD=xxxxxx --from-file=./amqp-certs/amqp.jks
 
 == Run
 
