@@ -36,4 +36,4 @@ Certificate location and password may be provided in the connection string. The 
 
 Once the test plan has been designed it can be run on OpenShift. Additional information here: <<../openshift/README.adoc#,OpenShift>>
 
-[the connection string looks now like: amqps://messaging-perftest.apps.sandbox.com:443?transport.trustStoreLocation=/opt/certificates/amqp.jks&amp;transport.trustStorePassword=${__P(JKS_PWD)}&amp;transport.verifyHost=false]
+//the connection string looks now like: amqps://messaging-perftest.apps.sandbox.com:443?transport.trustStoreLocation=/opt/certificates/amqp.jks&amp;transport.trustStorePassword=${__P(JKS_PWD)}&amp;transport.verifyHost=false

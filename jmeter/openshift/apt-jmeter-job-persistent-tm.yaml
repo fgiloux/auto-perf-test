@@ -30,7 +30,9 @@ objects:
                 valueFrom:
                   secretKeyRef:
                     name: ${JKS_SECRET}
-                    key: JKS_PWD
+                    key: J_JKS_PWD
+              - name: J_JKS_LOCATION
+                value: ${J_JKS_LOCATION}
             volumeMounts:
               - mountPath: /opt/jmeter/tests
                 name: tests
@@ -61,6 +63,9 @@ parameters:
   - description: Name of the secret containing the jks
     name: JKS_SECRET
     value: broker-jks
+  - description: Jks location
+    name: J_JKS_LOCATION
+    value: /opt/certificates/amqp.jks
   - description: Name of the persistent volume claim to use for storing the test(s) results
     name: JTL_PVC
     value: apt-jtl

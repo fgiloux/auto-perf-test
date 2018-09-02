@@ -26,6 +26,10 @@ A label can also be added to the config
 
  $ oc label configmap apt-jmx app=apt-jmeter
 
+== JMeter properties
+
+https://jmeter.apache.org/usermanual/properties_reference.html[Prorperties] allow to customize JMeter. Interesting for our purpose is for instance the possibility to customize the result file. They are two ways of setting properties, the first one is to inject a user.properties file. The second one is to pass them as command line argument with -J, example: -Jproperty_example=property_value. The values then overwrite what has been defined in jmeter.properties or reportgenerator.properties. To facilitate this second approach the run script transforms any environment variable with the J_ prefix to a command line argument. For instance the environment variable J_myprop will be passed as the parameter -Jmyprop. 
+
 == Certificates and credentials
 
 Very similar to the test plan certificates can be injected into the container. A secret may be used for this purpose rather than a configMap. A java keystore containing the broker certificates has been created in the <<../../enmasse/README.adoc#,EnMasse section>>. A password is also necessary to access the keystore and may be provided as environment variable. Both can be injected with a single secret running the following command in the same directory that was used for the creation of the java keystore.

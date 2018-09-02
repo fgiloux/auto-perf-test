@@ -65,12 +65,12 @@ The next step is to create a secret containing the java keystore:
 
 [source,bash]
 ----
-$ oc secrets new broker-jks amqp-certs/amqp.jks
+$ oc create secret generic app-broker-jks --from-literal=amqp.options.transport.trustStorePassword=xxxxxx --from-file=./amqp-certs/amqp.jks
 ----
 
 The secret can then be mounted in the container by updating the deployment configuration with the following command. You won't need this step if you have used the deployment configuration definition file provided in the git repository.
 
- $ oc set volume dc/camel-amq-fakeapp --add --name=broker-jks -m /opt/broker-jks -t secret --secret-name=broker-jks
+ $ oc set volume dc/camel-amq-fakeapp --add --name=broker-jks -m /opt/broker-jks -t secret --secret-name=app-broker-jks
 
 == Configuration externalisation
 

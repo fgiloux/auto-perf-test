@@ -13,7 +13,7 @@ endif::[]
 :toc-placement!:
 
 
-Building the JMeter image is pretty straightforward. 
+Building the JMeter image is pretty straightforward.
 
 The build configuration and image stream can be generated with
 
@@ -23,5 +23,4 @@ A binary build using the Dockerfile and context can then be launched with
 
  $ oc start-build apt-jmeter --from-dir=.
 
-Alternatively the object defintions for build configuration and image stream availabe at ../openshift can be used.
-
+Alternatively the object definitions for build configuration and image stream available at ../openshift can be used.

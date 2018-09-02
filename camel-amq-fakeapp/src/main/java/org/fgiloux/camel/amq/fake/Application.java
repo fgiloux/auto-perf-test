@@ -1,9 +1,8 @@
 package org.fgiloux.camel.amq.fake;
 
-import javax.jms.Session;
-
 import org.apache.activemq.jms.pool.PooledConnectionFactory;
 import org.apache.camel.component.amqp.AMQPComponent;
+import org.apache.camel.opentracing.starter.CamelOpenTracing;
 import org.apache.qpid.jms.JmsConnectionFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,6 +13,7 @@ import org.springframework.context.annotation.ImportResource;
  * The Spring-boot main class.
  */
 @SpringBootApplication
+@CamelOpenTracing
 @ImportResource({"classpath:spring/camel-context.xml"})
 public class Application {
 	

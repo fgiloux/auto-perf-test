@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="4.0" jmeter="4.0 r1823414">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Plan" enabled="true">
+      <stringProp name="TestPlan.comments"></stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath"></stringProp>
+      <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <JMSSampler guiclass="JMSSamplerGui" testclass="JMSSampler" testname="JMS Purge" enabled="true">
+          <stringProp name="JMSSampler.queueconnectionfactory">ConnectionFactory</stringProp>
+          <stringProp name="JMSSampler.SendQueue">input.queue</stringProp>
+          <stringProp name="JMSSampler.ReceiveQueue">output.queue</stringProp>
+          <intProp name="JMSSampler.communicationStyle">4</intProp>
+          <boolProp name="JMSSampler.isNonPersistent">false</boolProp>
+          <boolProp name="JMSSampler.useReqMsgIdAsCorrelId">false</boolProp>
+          <stringProp name="JMSSampler.timeout"></stringProp>
+          <stringProp name="JMSSampler.jmsNumberOfSamplesToAggregate"></stringProp>
+          <stringProp name="HTTPSamper.xml_data"></stringProp>
+          <stringProp name="JMSSampler.initialContextFactory">org.apache.qpid.jms.jndi.JmsInitialContextFactory</stringProp>
+          <stringProp name="JMSSampler.contextProviderUrl"></stringProp>
+          <elementProp name="JMSSampler.jndiProperties" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="connectionFactory.ConnectionFactory" elementType="Argument">
+                <stringProp name="Argument.name">connectionFactory.ConnectionFactory</stringProp>
+                <stringProp name="Argument.value">${connection_string}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="queue.input.queue" elementType="Argument">
+                <stringProp name="Argument.name">queue.input.queue</stringProp>
+                <stringProp name="Argument.value">${__P(input_queue,input.queue)}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="queue.output.queue" elementType="Argument">
+                <stringProp name="Argument.name">queue.output.queue</stringProp>
+                <stringProp name="Argument.value">${__P(output_queue,output.queue)}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <elementProp name="arguments" elementType="JMSProperties">
+            <collectionProp name="JMSProperties.properties"/>
+          </elementProp>
+        </JMSSampler>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">50</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <longProp name="ThreadGroup.start_time">1444135913000</longProp>
+        <longProp name="ThreadGroup.end_time">1444135913000</longProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.duration">20</stringProp>
+        <stringProp name="ThreadGroup.delay">5</stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <JMSSampler guiclass="JMSSamplerGui" testclass="JMSSampler" testname="JMS Sender" enabled="true">
+          <stringProp name="JMSSampler.queueconnectionfactory">ConnectionFactory</stringProp>
+          <stringProp name="JMSSampler.SendQueue">input.queue</stringProp>
+          <stringProp name="JMSSampler.ReceiveQueue"></stringProp>
+          <boolProp name="JMSSampler.isNonPersistent">false</boolProp>
+          <boolProp name="JMSSampler.useReqMsgIdAsCorrelId">false</boolProp>
+          <stringProp name="JMSSampler.timeout">2000</stringProp>
+          <stringProp name="HTTPSamper.xml_data">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
+&lt;Document xmlns=&quot;urn:iso:std:iso:20022:tech:xsd:pain.001.001.08&quot;&gt;
+    &lt;CstmrCdtTrfInitn&gt;
+        &lt;GrpHdr&gt;
+            &lt;MsgId&gt;${MSG_ID}&lt;/MsgId&gt;
+            &lt;CreDtTm&gt;2017-03-31T18:51:44.018+03:00&lt;/CreDtTm&gt;
+            &lt;NbOfTxs&gt;39&lt;/NbOfTxs&gt;
+            &lt;CtrlSum&gt;12754007436&lt;/CtrlSum&gt;
+            &lt;InitgPty&gt;
+                &lt;Id&gt;
+                    &lt;OrgId&gt;
+                        &lt;AnyBIC&gt;ONPJUR9JN26&lt;/AnyBIC&gt;
+                        &lt;Othr&gt;
+                            &lt;Id&gt;8d0bf39a-dc8a-4e38-8cdd-28eabbd79e8&lt;/Id&gt;
+                        &lt;/Othr&gt;
+                    &lt;/OrgId&gt;
+                &lt;/Id&gt;
+                &lt;CtryOfRes&gt;MY&lt;/CtryOfRes&gt;
+            &lt;/InitgPty&gt;
+        &lt;/GrpHdr&gt;
+        &lt;PmtInf&gt;
+            &lt;PmtInfId&gt;0095d7e6-c081-4d11-b5bf-c75866bab4d&lt;/PmtInfId&gt;
+            &lt;PmtMtd&gt;TRF&lt;/PmtMtd&gt;
+            &lt;BtchBookg&gt;true&lt;/BtchBookg&gt;
+            &lt;CtrlSum&gt;30&lt;/CtrlSum&gt;
+            &lt;ReqdExctnDt&gt;
+                &lt;DtTm&gt;2017-03-31T18:51:44.018+03:00&lt;/DtTm&gt;
+            &lt;/ReqdExctnDt&gt;
+            &lt;Dbtr&gt;
+                &lt;Nm&gt;liquid LLC&lt;/Nm&gt;
+                &lt;Id&gt;
+                    &lt;OrgId&gt;
+                        &lt;AnyBIC&gt;UOSLKZDPS9V&lt;/AnyBIC&gt;
+                        &lt;Othr&gt;
+                            &lt;Id&gt;06ea1ba7-4044-45ca-bce7-d6d31bf0950&lt;/Id&gt;
+                        &lt;/Othr&gt;
+                    &lt;/OrgId&gt;
+                &lt;/Id&gt;
+                &lt;CtryOfRes&gt;SG&lt;/CtryOfRes&gt;
+            &lt;/Dbtr&gt;
+            &lt;DbtrAcct&gt;
+                &lt;Id&gt;
+                    &lt;IBAN&gt;${DBTR_IBAN}&lt;/IBAN&gt;
+                &lt;/Id&gt;
+                &lt;Ccy&gt;GBP&lt;/Ccy&gt;
+                &lt;Nm&gt;order&lt;/Nm&gt;
+            &lt;/DbtrAcct&gt;
+            &lt;DbtrAgt&gt;
+                &lt;FinInstnId&gt;
+                    &lt;ClrSysMmbId&gt;
+                        &lt;ClrSysId&gt;
+                            &lt;Cd&gt;B4D&lt;/Cd&gt;
+                        &lt;/ClrSysId&gt;
+                        &lt;MmbId&gt;glass&lt;/MmbId&gt;
+                    &lt;/ClrSysMmbId&gt;
+                    &lt;Nm&gt;protest&lt;/Nm&gt;
+                &lt;/FinInstnId&gt;
+            &lt;/DbtrAgt&gt;
+            &lt;DbtrAgtAcct&gt;
+                &lt;Id&gt;
+                    &lt;IBAN&gt;AE25166D305NJLGDX3NQNR4&lt;/IBAN&gt;
+                &lt;/Id&gt;
+                &lt;Tp&gt;
+                    &lt;Prtry&gt;week&lt;/Prtry&gt;
+                &lt;/Tp&gt;
+            &lt;/DbtrAgtAcct&gt;
+            &lt;ChrgsAcct&gt;
+                &lt;Id&gt;
+                    &lt;IBAN&gt;GT75LMCA0Y2LKJWKX1T4ZY8PF6KF&lt;/IBAN&gt;
+                &lt;/Id&gt;
+                &lt;Ccy&gt;SGD&lt;/Ccy&gt;
+                &lt;Nm&gt;mother&lt;/Nm&gt;
+            &lt;/ChrgsAcct&gt;
+            &lt;CdtTrfTxInf&gt;
+                &lt;PmtId&gt;
+                    &lt;InstrId&gt;b27959d3-d5ea-4ed4-8665-7515860b61e&lt;/InstrId&gt;
+                    &lt;EndToEndId&gt;68008539-e8d9-47bb-a020-dae85eb88e0&lt;/EndToEndId&gt;
+                &lt;/PmtId&gt;
+                &lt;Amt&gt;
+                    &lt;EqvtAmt&gt;
+                        &lt;Amt Ccy=&quot;RUB&quot;&gt;10&lt;/Amt&gt;
+                        &lt;CcyOfTrf&gt;SGD&lt;/CcyOfTrf&gt;
+                    &lt;/EqvtAmt&gt;
+                &lt;/Amt&gt;
+                &lt;CdtrAgt&gt;
+                    &lt;FinInstnId&gt;
+                        &lt;BICFI&gt;ZTCCMM71&lt;/BICFI&gt;
+                    &lt;/FinInstnId&gt;
+                &lt;/CdtrAgt&gt;
+                &lt;Cdtr&gt;
+                    &lt;Nm&gt;breath Bank&lt;/Nm&gt;
+                    &lt;Id&gt;
+                        &lt;OrgId&gt;
+                            &lt;AnyBIC&gt;XPORFI6THXL&lt;/AnyBIC&gt;
+                            &lt;Othr&gt;
+                                &lt;Id&gt;3fd0322a-1d9b-484f-a4c9-d0b4f447330&lt;/Id&gt;
+                            &lt;/Othr&gt;
+                        &lt;/OrgId&gt;
+                    &lt;/Id&gt;
+                    &lt;CtryOfRes&gt;MY&lt;/CtryOfRes&gt;
+                &lt;/Cdtr&gt;
+                &lt;CdtrAcct&gt;
+                    &lt;Id&gt;
+                        &lt;IBAN&gt;${CDTR_IBAN}&lt;/IBAN&gt;
+                    &lt;/Id&gt;
+                    &lt;Ccy&gt;GBP&lt;/Ccy&gt;
+                &lt;/CdtrAcct&gt;
+            &lt;/CdtTrfTxInf&gt;
+        &lt;/PmtInf&gt;
+    &lt;/CstmrCdtTrfInitn&gt;
+&lt;/Document&gt;
+</stringProp>
+          <stringProp name="JMSSampler.initialContextFactory">org.apache.qpid.jms.jndi.JmsInitialContextFactory</stringProp>
+          <stringProp name="JMSSampler.contextProviderUrl"></stringProp>
+          <elementProp name="JMSSampler.jndiProperties" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="queue.input.queue" elementType="Argument">
+                <stringProp name="Argument.name">queue.input.queue</stringProp>
+                <stringProp name="Argument.value">${__P(input_queue,input.queue)}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="connectionFactory.ConnectionFactory" elementType="Argument">
+                <stringProp name="Argument.name">connectionFactory.ConnectionFactory</stringProp>
+                <stringProp name="Argument.value">${connection_string}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <elementProp name="arguments" elementType="JMSProperties">
+            <collectionProp name="JMSProperties.properties">
+              <elementProp name="" elementType="JMSProperty">
+                <stringProp name="JMSProperty.name">JMSCorrelationId</stringProp>
+                <stringProp name="JMSProperty.value">${MSG_ID}</stringProp>
+                <stringProp name="JMSProperty.type">java.lang.String</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <intProp name="JMSSampler.communicationStyle">0</intProp>
+        </JMSSampler>
+        <hashTree/>
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config" enabled="true">
+          <stringProp name="delimiter">,</stringProp>
+          <stringProp name="fileEncoding"></stringProp>
+          <stringProp name="filename">pain_samples.csv</stringProp>
+          <boolProp name="ignoreFirstLine">false</boolProp>
+          <boolProp name="quotedData">false</boolProp>
+          <boolProp name="recycle">true</boolProp>
+          <stringProp name="shareMode">shareMode.group</stringProp>
+          <boolProp name="stopThread">false</boolProp>
+          <stringProp name="variableNames"></stringProp>
+        </CSVDataSet>
+        <hashTree/>
+        <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="Constant Throughput Timer" enabled="true">
+          <intProp name="calcMode">2</intProp>
+          <doubleProp>
+            <name>throughput</name>
+            <value>600.0</value>
+            <savedValue>0.0</savedValue>
+          </doubleProp>
+        </ConstantThroughputTimer>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">50</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <longProp name="ThreadGroup.start_time">1444138916000</longProp>
+        <longProp name="ThreadGroup.end_time">1444138916000</longProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.duration">25</stringProp>
+        <stringProp name="ThreadGroup.delay">5</stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <JMSSampler guiclass="JMSSamplerGui" testclass="JMSSampler" testname="JMS Receiver" enabled="true">
+          <stringProp name="JMSSampler.queueconnectionfactory">ConnectionFactory</stringProp>
+          <stringProp name="JMSSampler.SendQueue">output.queue</stringProp>
+          <stringProp name="JMSSampler.ReceiveQueue"></stringProp>
+          <boolProp name="JMSSampler.isNonPersistent">false</boolProp>
+          <boolProp name="JMSSampler.useReqMsgIdAsCorrelId">false</boolProp>
+          <stringProp name="JMSSampler.timeout">10000</stringProp>
+          <stringProp name="HTTPSamper.xml_data"></stringProp>
+          <stringProp name="JMSSampler.initialContextFactory">org.apache.qpid.jms.jndi.JmsInitialContextFactory</stringProp>
+          <stringProp name="JMSSampler.contextProviderUrl"></stringProp>
+          <elementProp name="JMSSampler.jndiProperties" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="connectionFactory.ConnectionFactory" elementType="Argument">
+                <stringProp name="Argument.name">connectionFactory.ConnectionFactory</stringProp>
+                <stringProp name="Argument.value">${connection_string}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="queue.output.queue" elementType="Argument">
+                <stringProp name="Argument.name">queue.output.queue</stringProp>
+                <stringProp name="Argument.value">${__P(output_queue,output.queue)}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <elementProp name="arguments" elementType="JMSProperties">
+            <collectionProp name="JMSProperties.properties"/>
+          </elementProp>
+          <intProp name="JMSSampler.communicationStyle">2</intProp>
+        </JMSSampler>
+        <hashTree/>
+      </hashTree>
+      <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report" enabled="true">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <encoding>false</encoding>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <xml>false</xml>
+            <fieldNames>false</fieldNames>
+            <responseHeaders>true</responseHeaders>
+            <requestHeaders>true</requestHeaders>
+            <responseDataOnError>false</responseDataOnError>
+            <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
+            <assertionsResultsToSave>0</assertionsResultsToSave>
+            <bytes>true</bytes>
+            <threadCounts>true</threadCounts>
+          </value>
+        </objProp>
+        <stringProp name="filename"></stringProp>
+      </ResultCollector>
+      <hashTree/>
+      <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <encoding>false</encoding>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <xml>false</xml>
+            <fieldNames>false</fieldNames>
+            <responseHeaders>true</responseHeaders>
+            <requestHeaders>true</requestHeaders>
+            <responseDataOnError>false</responseDataOnError>
+            <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
+            <assertionsResultsToSave>0</assertionsResultsToSave>
+            <bytes>true</bytes>
+            <threadCounts>true</threadCounts>
+          </value>
+        </objProp>
+        <stringProp name="filename"></stringProp>
+      </ResultCollector>
+      <hashTree/>
+      <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="connection_string" elementType="Argument">
+            <stringProp name="Argument.name">connection_string</stringProp>
+            <stringProp name="Argument.value">amqps://${__P(BROKER,messaging-perftest.apps.sandbox.com)}:${__P(PORT,443)}?transport.trustStoreLocation=${__P(JKS_LOCATION,/home/fgiloux/Documents/projects/sandbox/auto-perf-test/camel-amq-fakeapp/src/main/resources/amqp-certs/amqp.jks)}&amp;transport.trustStorePassword=${__P(JKS_PWD,redhat)}&amp;transport.verifyHost=false</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+        </collectionProp>
+      </Arguments>
+      <hashTree/>
+      <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer" enabled="true">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <encoding>false</encoding>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <xml>false</xml>
+            <fieldNames>true</fieldNames>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <responseDataOnError>false</responseDataOnError>
+            <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+            <assertionsResultsToSave>0</assertionsResultsToSave>
+            <bytes>true</bytes>
+            <sentBytes>true</sentBytes>
+            <threadCounts>true</threadCounts>
+            <idleTime>true</idleTime>
+            <connectTime>true</connectTime>
+          </value>
+        </objProp>
+        <stringProp name="filename">result.jtl</stringProp>
+      </ResultCollector>
+      <hashTree/>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
