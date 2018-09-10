@@ -103,6 +103,7 @@
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
           <stringProp name="script">import java.time.Instant
+import io.opentracing.contrib.jms2.TracingMessageProducer;
 
 def session = System.getProperties().get(&quot;Session&quot;)
 def destination = System.getProperties().get(&quot;InputDestination&quot;)
@@ -117,7 +118,9 @@ def engine = new groovy.text.XmlTemplateEngine()
 def template = engine.createTemplate(msgTemplate).make(binding)
 def payload = template.toString()
 
-def producer = session.createProducer(destination)
+def tracer = System.getProperties().get(&quot;Tracer&quot;)
+def producer = new TracingMessageProducer(session.createProducer(destination), tracer);
+// def producer = session.createProducer(destination)
 def msg = session.createTextMessage(payload)
 
 def start = Instant.now()
@@ -156,27 +159,31 @@ SampleResult.setLatency(stop.toEpochMilli() - start.toEpochMilli())
           <stringProp name="script">import java.time.Instant
 import javax.jms.TextMessage
 import groovy.util.XmlSlurper
+import io.opentracing.contrib.jms.common.TracingMessageConsumer;
 
 def session = System.getProperties().get(&quot;Session&quot;)
 def destination = System.getProperties().get(&quot;OutputDestination&quot;)
 
-def consumer = session.createConsumer(destination)
+def tracer = System.getProperties().get(&quot;Tracer&quot;)
+def consumer = new TracingMessageConsumer(session.createConsumer(destination), tracer);
+// def consumer = session.createConsumer(destination)
 
 def start = Instant.now()
 def msg = consumer.receive(2000)
 def stop = Instant.now()
 
-// def msgId = 
-def tmp = msg.asType(TextMessage)
-def textMsg = tmp.getText()
-log.debug(&quot;### Incoming message:&quot; + textMsg + &quot; ###&quot;)
-def xmlMsg = new XmlSlurper().parseText(textMsg)
+def txtMsg = msg.asType(TextMessage)
+def txtMsgText = txtMsg.getText()
+log.debug(&quot;### Incoming message:&quot; + txtMsgText + &quot; ###&quot;)
+def xmlMsg = new XmlSlurper().parseText(txtMsgText)
 def msgId = xmlMsg.CstmrCdtTrfInitn.GrpHdr.MsgId.text().trim()
 log.debug(&quot;### MSG_ID: &quot; + msgId + &quot; ###&quot;)
 vars.put(&quot;MSG_ID&quot;, msgId)
+def jmsTimestamp = txtMsg.getJMSTimestamp()
+vars.put(&quot;JMS_TIMESTAMP&quot;, Long.toString(jmsTimestamp))
 consumer.close()
 
-SampleResult.setResponseData(textMsg)
+SampleResult.setResponseData(txtMsgText)
 SampleResult.setDataType(org.apache.jmeter.samplers.SampleResult.TEXT)
 SampleResult.setLatency( stop.toEpochMilli() - start.toEpochMilli() )
 </stringProp>
@@ -330,6 +337,8 @@ SampleResult.setLatency( stop.toEpochMilli() - start.toEpochMilli() )
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script">import javax.jms.Session
 import org.apache.qpid.jms.JmsConnectionFactory
+import io.opentracing.Tracer
+import io.jaegertracing.Configuration
 
 // loading the message template
 def painTemplateLocation = props.get(&quot;PAIN_TEMPLATE_LOCATION&quot;)
@@ -337,6 +346,9 @@ def msgTemplateFile = new File(painTemplateLocation)
 def msgTemplate = msgTemplateFile.getText(&apos;UTF-8&apos;)
 log.debug(msgTemplate)
 System.getProperties().put(&quot;MsgTemplate&quot;, msgTemplate)
+
+// Creating a tracer
+Tracer tracer = Configuration.fromEnv().getTracer();
 
 // Connections and Sessions are created once per thread and reused
 def factory = new JmsConnectionFactory()
@@ -356,6 +368,7 @@ System.getProperties().put(&quot;Session&quot;, session)
 System.getProperties().put(&quot;Connection&quot;, connection)
 System.getProperties().put(&quot;InputDestination&quot;, inputDestination)
 System.getProperties().put(&quot;OutputDestination&quot;, outputDestination)
+System.getProperties().put(&quot;Tracer&quot;, tracer)
 
 vars.put(&quot;setupDone&quot;, &quot;true&quot;)</stringProp>
           </JSR223Sampler>

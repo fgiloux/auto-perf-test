@@ -63,6 +63,8 @@ spec:
           value: localhost
         - name: JAEGER_SAMPLER_PARAM
           value: '1.0'
+        - name: JAEGER_PROPAGATION
+          value: 'jaeger,b3'
         image: docker-registry.default.svc:5000/perftest/camel-amq-fakeapp
         imagePullPolicy: IfNotPresent
         livenessProbe:

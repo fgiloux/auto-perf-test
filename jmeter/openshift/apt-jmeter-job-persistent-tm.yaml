@@ -33,6 +33,20 @@ objects:
                     key: J_JKS_PWD
               - name: J_JKS_LOCATION
                 value: ${J_JKS_LOCATION}
+              - name: J_PAIN_TEMPLATE_LOCATION
+                value: /opt/jmeter/tests/pain_template.xml
+              - name: J_PAIN_CSV_LOCATION
+                value: /opt/jmeter/tests/pain_samples.csv
+              - name: J_sample_variables
+                value: "MSG_ID,JMS_TIMESTAMP"
+              - name: JAEGER_SERVICE_NAME
+                value: jmeter
+              - name: JAEGER_TAGS
+                value: 'scope=pertest'
+              - name: JAEGER_SAMPLER_PARAM
+                value: '1'
+              - name: JAEGER_PROPAGATION
+                value: 'jaeger,b3'
             volumeMounts:
               - mountPath: /opt/jmeter/tests
                 name: tests
@@ -40,6 +54,23 @@ objects:
                 name: results
               - mountPath: /opt/certificates
                 name: jks
+                    - args:
+            - '--collector.host-port=jaeger-collector.perftest.svc:14267'
+            image: jaegertracing/jaeger-agent
+            imagePullPolicy: Always
+            name: jaeger-agent
+            ports:
+              - containerPort: 5775
+                protocol: UDP
+              - containerPort: 5778
+                protocol: TCP
+              - containerPort: 6831
+                protocol: UDP
+              - containerPort: 6832
+                protocol: UDP
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
           restartPolicy: OnFailure
           volumes:
             - name: "results"

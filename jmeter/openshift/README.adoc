@@ -20,7 +20,7 @@ The few generic steps are described here. The ones specific to the test plan pro
 
 A configMap is used for injecting the test plan into the image. From the directory where your jmx file is located you can create the configMap with a single command.
 
- $ oc create configmap apt-jmx --from-file=jms-p2p-example.jmx
+ $ oc create configmap apt-jmx --from-file=jms-code.jmx --from-file=pain_samples.csv --from-file=pain_template.xml
 
 A label can also be added to the config
 
