@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: DeploymentConfig
+metadata:
+  annotations:
+    openshift.io/generated-by: OpenShiftWebConsole
+  creationTimestamp: null
+  generation: 1
+  labels:
+    app: influxdb-1x
+  name: influxdb-1x
+spec:
+  replicas: 1
+  selector:
+    app: influxdb-1x
+    deploymentconfig: influxdb-1x
+  strategy:
+    activeDeadlineSeconds: 21600
+    resources: {}
+    rollingParams:
+      intervalSeconds: 1
+      maxSurge: 25%
+      maxUnavailable: 25%
+      timeoutSeconds: 600
+      updatePeriodSeconds: 1
+    type: Rolling
+  template:
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      labels:
+        app: influxdb-1x
+        deploymentconfig: influxdb-1x
+    spec:
+      containers:
+      - image: registry.connect.redhat.com/influxdata/influxdb-1x@sha256:91b145170df87e189c2f2c9d9983fe6128bee3922dc30438173ea05c210525af
+        imagePullPolicy: IfNotPresent 
+        name: influxdb-1x
+        ports:
+        - containerPort: 8086
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/influxdb
+          name: influxdb-1x-1
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - emptyDir: {}
+        name: influxdb-1x-1
+  test: false
+  triggers:
+  - type: ConfigChange
+  - imageChangeParams:
+      automatic: true
+      containerNames:
+      - influxdb-1x
+      from:
+        kind: ImageStreamTag
+        name: influxdb-1x:latest
+        namespace: perftest
+    type: ImageChange
+status:
+  availableReplicas: 0
+  latestVersion: 0
+  observedGeneration: 0
+  replicas: 0
+  unavailableReplicas: 0
+  updatedReplicas: 0

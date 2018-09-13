@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: BuildConfig
+metadata:
+  name: perftest-jenkins
+spec:
+  source:                       
+    git:
+      uri: https://github.com/fgiloux/auto-perf-test.git
+    contextDir: "jenkins"
+    type: Git
+  strategy:                     
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: jenkins:latest
+        namespace: openshift
+    type: Source
+  output:                       
+    to:
+      kind: ImageStreamTag
+      name: perftest-jenkins:latest
+
+

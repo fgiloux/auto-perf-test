@@ -39,6 +39,10 @@ objects:
                 value: /opt/jmeter/tests/pain_samples.csv
               - name: J_sample_variables
                 value: "MSG_ID,JMS_TIMESTAMP"
+              - name: J_INFLUXDB_SERVER
+                value: 'influxdb-1x'
+              - name: J_INFLUXDB_PORT
+                value: '8086'
               - name: JAEGER_SERVICE_NAME
                 value: jmeter
               - name: JAEGER_SAMPLER_PARAM

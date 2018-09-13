@@ -66,7 +66,7 @@
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
-          <stringProp name="LoopController.loops">10</stringProp>
+          <stringProp name="LoopController.loops">100</stringProp>
         </elementProp>
         <stringProp name="ThreadGroup.num_threads">1</stringProp>
         <stringProp name="ThreadGroup.ramp_time">1</stringProp>
@@ -98,7 +98,7 @@
           </doubleProp>
         </ConstantThroughputTimer>
         <hashTree/>
-        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sender" enabled="true">
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223_Sender" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -124,11 +124,13 @@ def producer = new TracingMessageProducer(session.createProducer(destination), t
 def msg = session.createTextMessage(payload)
 
 def start = Instant.now()
+msg.setLongProperty(&quot;startTime&quot;, start.toEpochMilli())
 producer.send(msg)
 def stop = Instant.now()
 
 producer.close()
 
+vars.put(&quot;START_TIME&quot;, Long.toString(start.toEpochMilli()))
 SampleResult.setDataType(org.apache.jmeter.samplers.SampleResult.TEXT)
 SampleResult.setLatency(stop.toEpochMilli() - start.toEpochMilli())
 </stringProp>
@@ -140,7 +142,7 @@ SampleResult.setLatency(stop.toEpochMilli() - start.toEpochMilli())
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
-          <stringProp name="LoopController.loops">10</stringProp>
+          <stringProp name="LoopController.loops">100</stringProp>
         </elementProp>
         <stringProp name="ThreadGroup.num_threads">1</stringProp>
         <stringProp name="ThreadGroup.ramp_time">1</stringProp>
@@ -151,7 +153,7 @@ SampleResult.setLatency(stop.toEpochMilli() - start.toEpochMilli())
         <stringProp name="ThreadGroup.delay">5</stringProp>
       </ThreadGroup>
       <hashTree>
-        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Receiver" enabled="true">
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223_Receiver" enabled="true">
           <stringProp name="scriptLanguage">groovy</stringProp>
           <stringProp name="parameters"></stringProp>
           <stringProp name="filename"></stringProp>
@@ -172,6 +174,7 @@ def start = Instant.now()
 def msg = consumer.receive(2000)
 def stop = Instant.now()
 
+def startTime = msg.getLongProperty(&quot;startTime&quot;)
 def txtMsg = msg.asType(TextMessage)
 def txtMsgText = txtMsg.getText()
 log.debug(&quot;### Incoming message:&quot; + txtMsgText + &quot; ###&quot;)
@@ -179,6 +182,7 @@ def xmlMsg = new XmlSlurper().parseText(txtMsgText)
 def msgId = xmlMsg.CstmrCdtTrfInitn.GrpHdr.MsgId.text().trim()
 log.debug(&quot;### MSG_ID: &quot; + msgId + &quot; ###&quot;)
 vars.put(&quot;MSG_ID&quot;, msgId)
+vars.put(&quot;START_TIME&quot;, Long.toString(startTime))
 def jmsTimestamp = txtMsg.getJMSTimestamp()
 vars.put(&quot;JMS_TIMESTAMP&quot;, Long.toString(jmsTimestamp))
 consumer.close()
@@ -273,6 +277,16 @@ SampleResult.setLatency( stop.toEpochMilli() - start.toEpochMilli() )
             <stringProp name="Argument.value">&quot;false&quot;</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
+          <elementProp name="influxdb_server" elementType="Argument">
+            <stringProp name="Argument.name">influxdb_server</stringProp>
+            <stringProp name="Argument.value">${__P(INFLUXDB_SERVER,influxdb-1x-perftest.apps.sandbox.com)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="influxdb_port" elementType="Argument">
+            <stringProp name="Argument.name">influxdb_port</stringProp>
+            <stringProp name="Argument.value">${__P(INFLUXDB_PORT,80)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
         </collectionProp>
       </Arguments>
       <hashTree/>
@@ -311,6 +325,59 @@ SampleResult.setLatency( stop.toEpochMilli() - start.toEpochMilli() )
         </objProp>
         <stringProp name="filename">result.jtl</stringProp>
       </ResultCollector>
+      <hashTree/>
+      <BackendListener guiclass="BackendListenerGui" testclass="BackendListener" testname="Backend Listener_InfluxDB" enabled="true">
+        <elementProp name="arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" enabled="true">
+          <collectionProp name="Arguments.arguments">
+            <elementProp name="influxdbMetricsSender" elementType="Argument">
+              <stringProp name="Argument.name">influxdbMetricsSender</stringProp>
+              <stringProp name="Argument.value">org.apache.jmeter.visualizers.backend.influxdb.HttpMetricsSender</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+            <elementProp name="influxdbUrl" elementType="Argument">
+              <stringProp name="Argument.name">influxdbUrl</stringProp>
+              <stringProp name="Argument.value">http://${influxdb_server}:${influxdb_port}/write?db=jmeter</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+            <elementProp name="application" elementType="Argument">
+              <stringProp name="Argument.name">application</stringProp>
+              <stringProp name="Argument.value">fakeapp</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+            <elementProp name="measurement" elementType="Argument">
+              <stringProp name="Argument.name">measurement</stringProp>
+              <stringProp name="Argument.value">jmeter</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+            <elementProp name="summaryOnly" elementType="Argument">
+              <stringProp name="Argument.name">summaryOnly</stringProp>
+              <stringProp name="Argument.value">false</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+            <elementProp name="samplersRegex" elementType="Argument">
+              <stringProp name="Argument.name">samplersRegex</stringProp>
+              <stringProp name="Argument.value">.*</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+            <elementProp name="percentiles" elementType="Argument">
+              <stringProp name="Argument.name">percentiles</stringProp>
+              <stringProp name="Argument.value">90;95;99</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+            <elementProp name="testTitle" elementType="Argument">
+              <stringProp name="Argument.name">testTitle</stringProp>
+              <stringProp name="Argument.value">Perftest</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+            <elementProp name="eventTags" elementType="Argument">
+              <stringProp name="Argument.name">eventTags</stringProp>
+              <stringProp name="Argument.value"></stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+          </collectionProp>
+        </elementProp>
+        <stringProp name="classname">org.apache.jmeter.visualizers.backend.influxdb.InfluxdbBackendListenerClient</stringProp>
+      </BackendListener>
       <hashTree/>
       <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="setUp Thread Group" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">stoptestnow</stringProp>
