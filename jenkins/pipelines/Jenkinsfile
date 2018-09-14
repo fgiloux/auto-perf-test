@@ -1,12 +1,16 @@
+// These could also be passed as parameters
+def testPlanPath = 'https://raw.githubusercontent.com/fgiloux/auto-perf-test/master/jmeter/openshift/apt-jmx-cm.yaml' 
+def testPlanName = 'apt-jmx' 
 pipeline {
-  // The agent specifies where the pipeline is to run
-  // For demo purpose it will run on the Jenkins server
-  // to avoid creating a new pod
   agent {
     node {
       label 'master' 
     }
   }
+  // triggers {
+    // Execute the pipeline once a day with automated distribution.
+    // cron('H H * * *)
+  //}
   options {
     timeout(time: 20, unit: 'MINUTES') 
   }
@@ -31,12 +35,13 @@ pipeline {
             openshift.withCluster() {
                 openshift.withProject() {
                   // Deactivated for making demos quicker
-                  /* openshift.selector("all", [ app : camel-amq-fakeapp ]).delete() */
+                  /* openshift.selector("all", [ 'app' : 'camel-amq-fakeapp' ]).delete() */
                   // Secrets need to be addressed separately
                   /* if (openshift.selector("secrets", secretName).exists()) { 
                     openshift.selector("secrets", secretName).delete()
                   } */
-                  /* openshift.selector("all", [ job-name : apt-jmeter ]).delete() */
+                  openshift.selector("all", [ "testplan" : testPlanName ]).delete()
+                  openshift.selector("configMaps", [ "testplan" : testPlanName ]).delete()
                 }
             }
         }
@@ -79,12 +84,17 @@ pipeline {
             openshift.withCluster() {
                 openshift.withProject() {
                     // Credentials prepopulated in environment for security reason
-                    // TODO: Create configMaps with
-                    //         - application properties
+                    // TODO: Create separate configMaps for
                     //         - test plan
                     //         - message template
                     //         - dataset
+                    // In real life an scm plugin would be used.
+                    // def testPlanCmSource = sh(returnStdout: true, script: "curl ${testPlanPath}")
+                    def testPlanCm = openshift.create(testPlanPath).object()
+                    testPlanCm.metadata.labels['testplan'] = testPlanName
+                    openshift.apply(testPlanCm)
                     // Deactivated for making demos quicker
+                    //         - TODO: Creation of configMap with application properties
                     /* def dc = openshift.selector("dc", 'camel-amq-fakeapp').rollout()
                     timeout(5) { 
                         openshift.selector("dc", 'camel-amq-fakeapp').related('pods').untilEach(1) {
@@ -102,7 +112,18 @@ pipeline {
         script {
             openshift.withCluster() {
                 openshift.withProject() {
-                    echo "Tests execution"
+                    echo "Starting tests"
+                    // Test plan is configurable
+                    // Environment variables can be passed to run the same test plan with different conditions:
+                    // duration, number of messages sent, distribution parameters
+                    def models = openshift.process("apt-jmeter-job", "-p", "JMX_CONFIGMAP=${testPlanName}")
+                    // It is possible to modify the objects, mounting a JKS with credentials for a specic broker for instance
+                    // Just adding a label here
+                    for ( o in models ) {
+                          o.metadata.labels['testplan'] = testPlanName
+                    }
+                    def created = openshift.create(models)
+                    echo "Tests completed"
                 }
             }
         }
@@ -122,3 +143,4 @@ pipeline {
     }
   }
 }
+
