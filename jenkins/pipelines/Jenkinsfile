@@ -1,0 +1,124 @@
+pipeline {
+  // The agent specifies where the pipeline is to run
+  // For demo purpose it will run on the Jenkins server
+  // to avoid creating a new pod
+  agent {
+    node {
+      label 'master' 
+    }
+  }
+  options {
+    timeout(time: 20, unit: 'MINUTES') 
+  }
+  stages {
+    stage('preamble') {
+        steps {
+            script {
+                openshift.withCluster() {
+                    openshift.withProject() {
+                        echo "Using project: ${openshift.project()}"
+                    }
+                }
+            }
+        }
+    }
+    // The aim of this section is to make sure that the environment
+    // has no left over. Delete and recreate provides confidence
+    // and reproducibility.
+    stage('cleanup') {
+      steps {
+        script {
+            openshift.withCluster() {
+                openshift.withProject() {
+                  // Deactivated for making demos quicker
+                  /* openshift.selector("all", [ app : camel-amq-fakeapp ]).delete() */
+                  // Secrets need to be addressed separately
+                  /* if (openshift.selector("secrets", secretName).exists()) { 
+                    openshift.selector("secrets", secretName).delete()
+                  } */
+                  /* openshift.selector("all", [ job-name : apt-jmeter ]).delete() */
+                }
+            }
+        }
+      }
+    }
+    // Template may be used to populate the environment
+    // Not used here
+    /* stage('create') {
+      steps {
+        script {
+            openshift.withCluster() {
+                openshift.withProject() {
+                  openshift.newApp(templatePath) 
+                }
+            }
+        }
+      }
+    } */
+    // This stage is for building the application from git repository
+    stage('build') {
+      steps {
+        script {
+            openshift.withCluster() {
+                openshift.withProject() {
+                    // Deactivated for making demos quicker
+                    /* def builds = openshift.selector("bc", 'camel-amq-fakeapp-s2i').startBuild("--wait=true") */
+                }
+            }
+        }
+      }
+    }
+    // This stage is provisioning the environment with specifics
+    // This may include credentials and configMaps with endpoint information
+    // A new deployment is started if no image change trigger is configured
+    // in the deployment configuration, only wait for deployment completion otherwise
+    // Test plans and datsets to be run are also create here.
+    stage('deploy') {
+      steps {
+        script {
+            openshift.withCluster() {
+                openshift.withProject() {
+                    // Credentials prepopulated in environment for security reason
+                    // TODO: Create configMaps with
+                    //         - application properties
+                    //         - test plan
+                    //         - message template
+                    //         - dataset
+                    // Deactivated for making demos quicker
+                    /* def dc = openshift.selector("dc", 'camel-amq-fakeapp').rollout()
+                    timeout(5) { 
+                        openshift.selector("dc", 'camel-amq-fakeapp').related('pods').untilEach(1) {
+                            return (it.object().status.phase == "Running")
+                        }
+                    } */
+                }
+            }
+        }
+      }
+    }
+    // This stage is for test execution
+    stage('test') {
+      steps {
+        script {
+            openshift.withCluster() {
+                openshift.withProject() {
+                    echo "Tests execution"
+                }
+            }
+        }
+      }
+    }
+    // After tests have been successfully executed the image may be tagged accordingly
+    stage('tag') {
+      steps {
+        script {
+            openshift.withCluster() {
+                openshift.withProject() {
+                  openshift.tag("camel-amq-fakeapp:latest", "camel-amq-fakeapp:staging") 
+                }
+            }
+        }
+      }
+    }
+  }
+}

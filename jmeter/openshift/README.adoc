@@ -24,7 +24,7 @@ A configMap is used for injecting the test plan into the image. From the directo
 
 A label can also be added to the config
 
- $ oc label configmap apt-jmx app=apt-jmeter
+ $ oc label configMap apt-jmx job-name=apt-jmeter
 
 == JMeter properties
 

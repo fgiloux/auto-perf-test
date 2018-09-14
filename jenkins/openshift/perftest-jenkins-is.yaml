@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ImageStream
+metadata:
+  annotations:
+  labels:
+    app: perftest-jenkins
+  name: perftest-jenkins 
+spec: {}

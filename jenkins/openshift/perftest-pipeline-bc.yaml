@@ -1,0 +1,12 @@
+kind: "BuildConfig"
+apiVersion: "v1"
+metadata:
+  name: "perftest-pipeline"
+spec:
+  source:
+    git:
+      uri: "https://github.com/fgiloux/auto-perf-test.git"
+    contextDir: jenkins
+  strategy:
+    jenkinsPipelineStrategy:
+      jenkinsfilePath: pipelines/Jenkinsfile
