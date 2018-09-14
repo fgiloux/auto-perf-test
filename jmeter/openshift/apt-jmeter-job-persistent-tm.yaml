@@ -17,6 +17,8 @@ objects:
       template:
         metadata:
           name: apt-jmeter
+          labels:
+            testplan: apt-jmx
         spec:
           containers:
           - name: jmeter
@@ -43,10 +45,8 @@ objects:
                 value: 'influxdb-1x'
               - name: J_INFLUXDB_PORT
                 value: '8086'
-             - name: JAEGER_SERVICE_NAME
+              - name: JAEGER_SERVICE_NAME
                 value: jmeter
-              - name: JAEGER_TAGS
-                value: 'scope=pertest'
               - name: JAEGER_SAMPLER_PARAM
                 value: '1'
               - name: JAEGER_PROPAGATION
@@ -58,7 +58,7 @@ objects:
                 name: results
               - mountPath: /opt/certificates
                 name: jks
-                    - args:
+          - args:
             - '--collector.host-port=jaeger-collector.perftest.svc:14267'
             image: jaegertracing/jaeger-agent
             imagePullPolicy: Always
@@ -103,5 +103,5 @@ parameters:
     value: /opt/certificates/amqp.jks
   - description: Name of the persistent volume claim to use for storing the test(s) results
     name: JTL_PVC
-    value: apt-jtl
+    value: apt-jmeter
 

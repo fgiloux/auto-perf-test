@@ -57,3 +57,4 @@ It may also be useful to first create the template in OpenShift, so that it can 
  $ oc create -f apt-jmeter-job-tm.yaml
 
 Another template apt-jmeter-job-persistent-tm.yaml allows to mount a persistent volume instead of emptyDir for storing the test results. An additional parameter allows the specification of the PVC name.
+This is useful when the test results are to be read after the job has terminated, from Jenkins for instance.

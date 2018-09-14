@@ -17,6 +17,8 @@ objects:
       template:
         metadata:
           name: apt-jmeter
+          labels:
+            testplan: apt-jmx
         spec:
           containers:
           - name: jmeter

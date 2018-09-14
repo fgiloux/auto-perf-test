@@ -73,7 +73,7 @@
         <longProp name="ThreadGroup.start_time">1444135913000</longProp>
         <longProp name="ThreadGroup.end_time">1444135913000</longProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
-        <stringProp name="ThreadGroup.duration">20</stringProp>
+        <stringProp name="ThreadGroup.duration">100</stringProp>
         <stringProp name="ThreadGroup.delay">5</stringProp>
       </ThreadGroup>
       <hashTree>
@@ -149,7 +149,7 @@ SampleResult.setLatency(stop.toEpochMilli() - start.toEpochMilli())
         <longProp name="ThreadGroup.start_time">1444138916000</longProp>
         <longProp name="ThreadGroup.end_time">1444138916000</longProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
-        <stringProp name="ThreadGroup.duration">25</stringProp>
+        <stringProp name="ThreadGroup.duration">100</stringProp>
         <stringProp name="ThreadGroup.delay">5</stringProp>
       </ThreadGroup>
       <hashTree>
