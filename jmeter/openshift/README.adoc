@@ -26,6 +26,10 @@ A label can also be added to the config
 
  $ oc label configMap apt-jmx job-name=apt-jmeter
 
+This configMap has been exported and stored for reuse by Jenkins (it could also be recreated each time from files)
+
+ $ oc export configMap apt-jmx > ../openshift/apt-jmx-cm.yaml
+
 == JMeter properties
 
 https://jmeter.apache.org/usermanual/properties_reference.html[Prorperties] allow to customize JMeter. Interesting for our purpose is for instance the possibility to customize the result file. They are two ways of setting properties, the first one is to inject a user.properties file. The second one is to pass them as command line argument with -J, example: -Jproperty_example=property_value. The values then overwrite what has been defined in jmeter.properties or reportgenerator.properties. To facilitate this second approach the run script transforms any environment variable with the J_ prefix to a command line argument. For instance the environment variable J_myprop will be passed as the parameter -Jmyprop. 
@@ -47,5 +51,9 @@ If you want to replace it with a new version you can use the follwing.
  $ oc process -f apt-jmeter-job-tm.yaml | oc replace --force -f -
 
 It is possible to pass the namespace and name of configMap with the JMeter test suite as parameter.
+
+It may also be useful to first create the template in OpenShift, so that it can easily be called from Jenkins for instance:
+
+ $ oc create -f apt-jmeter-job-tm.yaml
 
 Another template apt-jmeter-job-persistent-tm.yaml allows to mount a persistent volume instead of emptyDir for storing the test results. An additional parameter allows the specification of the PVC name.
