@@ -16,10 +16,12 @@ done
 # -e -o $2-reports
 
 
-# Curl back to webhook step in Jenkins pipeline
-# Give pipeline the name of the test suite pod
-# curl -X POST -d "$HOSTNAME" $1
+# Call back the webhook step in Jenkins pipeline
+# The name of the test suite pod is provided
+if [ -n "${CALLBACK_URL}" ]; then
+    curl -X POST -d "${HOSTNAME}" "${CALLBACK_URL}"
+fi
 
-# Another option would be to sleep for a few minutes to give Jenkins the chance to retrieve dashboard files through oc rsync
+# An option would be to sleep for a few minutes to give Jenkins the chance to retrieve dashboard files through oc rsync
 # if persistent volumes can't be used
 # sleep 600

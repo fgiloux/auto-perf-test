@@ -51,6 +51,8 @@ objects:
                 value: '1'
               - name: JAEGER_PROPAGATION
                 value: 'jaeger,b3'
+              - name: CALLBACK_URL
+                value: ${CALLBACK_URL}
             volumeMounts:
               - mountPath: /opt/jmeter/tests
                 name: tests
@@ -97,6 +99,8 @@ parameters:
   - description: Name of the secret containing the jks
     name: JKS_SECRET
     value: broker-jks
-  - description: Jks location
+  - description: JKS location
     name: J_JKS_LOCATION
     value: /opt/certificates/amqp.jks
+  - description: Url for notification of test completion
+    name: CALLBACK_URL

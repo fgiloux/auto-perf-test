@@ -53,6 +53,8 @@ objects:
                 value: 'jaeger,b3'
               - name: RESULT_SUB_DIR
                 value: ${RESULT_SUB_DIR}
+              - name: CALLBACK_URL
+                value: ${CALLBACK_URL}
             volumeMounts:
               - mountPath: /opt/jmeter/tests
                 name: tests
@@ -108,4 +110,5 @@ parameters:
     value: apt-jmeter
   - description: Name of the subdirectory where test results are to be stored 
     name: RESULT_SUB_DIR
-
+  - description: Url for notification of test completion 
+    name: CALLBACK_URL
