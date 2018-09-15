@@ -102,7 +102,7 @@ pipeline {
                             return (it.object().status.phase == "Running")
                         }
                     } */
-                    // Generate the performance report
+                    // Generate the performance reports
                     // perfReport 'result.csv'
                 }
             }
@@ -119,7 +119,7 @@ pipeline {
                     // Test plan is configurable
                     // Environment variables can be passed to run the same test plan with different conditions:
                     // duration, number of messages sent, distribution parameters
-                    def models = openshift.process("apt-jmeter-job", "-p", "JMX_CONFIGMAP=${testPlanName}")
+                    def models = openshift.process("apt-jmeter-job", "-p", "JMX_CONFIGMAP=${testPlanName}","-p","RESULT_SUB_DIR=${JOB_NAME}/${BUILD_NUMBER}")
                     // It is possible to modify the objects, mounting a JKS with credentials for a specic broker for instance
                     // Just adding a label here
                     for ( o in models ) {
@@ -127,13 +127,10 @@ pipeline {
                     }
                     def created = openshift.create(models)
                     // TODO: to be replaced by a hook.
-                    sleep(10)
-                    def jmeterPod = openshift.selector('pod', ['testplan': testPlanName]).object()
-                    // TODO:
-                    // The name of the shared drive for the result is to be passed as param to the job
-                    // Param to be added to the template and here. The build id could be used for the purpose
-                    // The result is available on a shared drive to be mounted by Jenkins
-                    //perfReport 'result.csv'
+                    sleep(100)
+                    //def jmeterPod = openshift.selector('pod', ['testplan': testPlanName]).object()
+                    // The test results are available on a shared drive mounted by Jenkins
+                    perfReport '/opt/performances/${JOB_NAME}/${BUILD_NUMBER}/*.jtl'
                     echo "Tests completed"
                 }
             }

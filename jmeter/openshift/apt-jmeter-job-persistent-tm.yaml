@@ -51,6 +51,8 @@ objects:
                 value: '1'
               - name: JAEGER_PROPAGATION
                 value: 'jaeger,b3'
+              - name: RESULT_SUB_DIR
+                value: ${RESULT_SUB_DIR}
             volumeMounts:
               - mountPath: /opt/jmeter/tests
                 name: tests
@@ -104,4 +106,6 @@ parameters:
   - description: Name of the persistent volume claim to use for storing the test(s) results
     name: JTL_PVC
     value: apt-jmeter
+  - description: Name of the subdirectory where test results are to be stored 
+    name: RESULT_SUB_DIR
 
