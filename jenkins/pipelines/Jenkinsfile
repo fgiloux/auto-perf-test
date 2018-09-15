@@ -42,6 +42,7 @@ pipeline {
                   } */
                   openshift.selector("all", [ "testplan" : testPlanName ]).delete()
                   openshift.selector("configMaps", [ "testplan" : testPlanName ]).delete()
+                  /* openshift.selector("all", [ job-name : apt-jmeter ]).delete() */
                 }
             }
         }
@@ -101,6 +102,8 @@ pipeline {
                             return (it.object().status.phase == "Running")
                         }
                     } */
+                    // Generate the performance report
+                    // perfReport 'result.csv'
                 }
             }
         }
@@ -123,6 +126,14 @@ pipeline {
                           o.metadata.labels['testplan'] = testPlanName
                     }
                     def created = openshift.create(models)
+                    // TODO: to be replaced by a hook.
+                    sleep(10)
+                    def jmeterPod = openshift.selector('pod', ['testplan': testPlanName]).object()
+                    // TODO:
+                    // The name of the shared drive for the result is to be passed as param to the job
+                    // Param to be added to the template and here. The build id could be used for the purpose
+                    // The result is available on a shared drive to be mounted by Jenkins
+                    //perfReport 'result.csv'
                     echo "Tests completed"
                 }
             }
