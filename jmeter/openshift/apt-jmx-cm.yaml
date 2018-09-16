@@ -614,3 +614,6 @@ kind: ConfigMap
 metadata:
   creationTimestamp: null
   name: apt-jmx
+  labels:
+    name: apt-jmx
+    
