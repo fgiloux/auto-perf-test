@@ -40,8 +40,12 @@ pipeline {
                   /* if (openshift.selector("secrets", secretName).exists()) { 
                     openshift.selector("secrets", secretName).delete()
                   } */
-                  openshift.selector("all", [ "testplan" : testPlanName ]).delete()
-                  openshift.selector("configMaps", [ "testplan" : testPlanName ]).delete()
+                  if (openshift.selector("all", [ "testplan" : testPlanName ]).exists()) {
+                      openshift.selector("all", [ "testplan" : testPlanName ]).delete()
+                  }
+                  if (openshift.selector("configMaps", [ "testplan" : testPlanName ]).exists()) {
+                      openshift.selector("configMaps", [ "testplan" : testPlanName ]).delete()
+                  }
                   /* openshift.selector("all", [ job-name : apt-jmeter ]).delete() */
                 }
             }
@@ -133,7 +137,8 @@ pipeline {
                         waitForWebhook hook
                     }
                     // The test results are available on a shared drive mounted by Jenkins
-                    perfReport '/opt/performances/${JOB_NAME}/${BUILD_NUMBER}/*.jtl'
+                    perfReport "/opt/performances/${JOB_NAME}/${BUILD_NUMBER}/*.jtl"
+                    // perfReport sourceDataFiles: "/opt/performances/${JOB_NAME}/${BUILD_NUMBER}/*.jtl", compareBuildPrevious: true, modePerformancePerTestCase: true, modeOfThreshold: true, relativeFailedThresholdPositive: 50, relativeUnstableThresholdNegative: 40, relativeUnstableThresholdPositive: 40
                     // Job delete required due to the jaeger-agent sidecar not terminating
                     openshift.selector('job', ['testplan': testPlanName]).delete()
                     echo "Tests completed"
