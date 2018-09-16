@@ -127,6 +127,8 @@ data:
     def msg = session.createTextMessage(payload)
 
     def start = Instant.now()
+    // It would be better (less specific) to use opentracing baggage rather
+    // than directly setting the field into the JMS header
     msg.setLongProperty(&quot;startTime&quot;, start.toEpochMilli())
     producer.send(msg)
     def stop = Instant.now()
@@ -192,8 +194,10 @@ data:
 
     SampleResult.setResponseData(txtMsgText)
     SampleResult.setDataType(org.apache.jmeter.samplers.SampleResult.TEXT)
-    SampleResult.setLatency( stop.toEpochMilli() - start.toEpochMilli() )
-    </stringProp>
+    // Latency for a synchronous call (reading a message here)
+    // SampleResult.setLatency( stop.toEpochMilli() - start.toEpochMilli() )
+    // End to end latency (between send &amp; receive)
+    SampleResult.setLatency( jmsTimestamp - startTime )</stringProp>
             </JSR223Sampler>
             <hashTree/>
           </hashTree>
@@ -609,6 +613,4 @@ data:
 kind: ConfigMap
 metadata:
   creationTimestamp: null
-  labels:
-    job-name: apt-jmeter
   name: apt-jmx
