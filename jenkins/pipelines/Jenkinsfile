@@ -4,9 +4,12 @@ def testPlanName = 'apt-jmx'
 pipeline {
   agent {
     node {
-      label 'master' 
+      label 'master'
     }
   }
+  environment {
+    JENKINS_URL = "http://jenkins"
+  } 
   // triggers {
     // Execute the pipeline once a day with automated distribution.
     // cron('H H * * *)
