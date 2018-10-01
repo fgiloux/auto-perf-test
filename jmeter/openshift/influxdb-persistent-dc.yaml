@@ -51,8 +51,9 @@ spec:
       securityContext: {}
       terminationGracePeriodSeconds: 30
       volumes:
-      - emptyDir: {}
-        name: influxdb-1x-1
+      - name: "influxdb-1x-1"
+        persistentVolumeClaim:
+          claimName: influxdb
   test: false
   triggers:
   - type: ConfigChange

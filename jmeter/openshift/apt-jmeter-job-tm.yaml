@@ -45,6 +45,10 @@ objects:
                 value: 'influxdb-1x'
               - name: J_INFLUXDB_PORT
                 value: '8086'
+              - name: J_BROKER
+                value: 'messaging'
+              - name: J_PORT
+                value: 5671
               - name: JAEGER_SERVICE_NAME
                 value: jmeter
               - name: JAEGER_SAMPLER_PARAM
