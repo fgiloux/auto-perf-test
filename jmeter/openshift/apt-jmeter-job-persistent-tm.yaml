@@ -41,6 +41,10 @@ objects:
                 value: /opt/jmeter/tests/pain_samples.csv
               - name: J_sample_variables
                 value: "MSG_ID,JMS_TIMESTAMP"
+              - name: J_BROKER
+                value: messaging
+              - name: J_PORT
+                value: 5671
               - name: J_INFLUXDB_SERVER
                 value: 'influxdb-1x'
               - name: J_INFLUXDB_PORT
