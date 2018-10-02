@@ -61,7 +61,7 @@ $ oc extract secret/external-certs-messaging --to=amqp-certs
 $ keytool -v -import -file amqp-certs/tls.crt -alias cacrt -keystore amqp-certs/amqp.jks
 ----
 
-The next step is to create a secret containing the java keystore:
+The next step is to create a secret containing the java keystore and the password to access it:
 
 [source,bash]
 ----
@@ -74,7 +74,7 @@ The secret can then be mounted in the container by updating the deployment confi
 
 == Configuration externalisation
 
-You may have noted that the openshift directory in the git repository also contains a configMap. This configMap is used for externalising environment dependent properties that are injected into the Spring Boot application through application.properties. Defaults can be defined in the property file provided with the application archive (jar). Only properties whose values should be overwritten can be specified in the ConfigMap. This works as Spring Boot will privilege values defined externally to the ones defined in application.properties embedded in the jar. Here are the steps that have been used. Alternatively you can use the "oc create -f" command provided earlier.
+You may have noted that the openshift directory in the git repository also contains a configMap. This configMap is used for externalising environment dependent properties that are injected into the Spring Boot application through application.properties. Defaults can be defined in the property file provided with the application archive (jar). Only properties whose values should be overwritten can be specified in the ConfigMap. This works as Spring Boot will privilege values defined externally to the ones defined in application.properties embedded in the jar. *You will have to change the "amqp.host" propery with the name of your own broker*. Here are the steps that have been used afterwards. Alternatively you can use the "oc create -f" command provided earlier.
 
  $ oc create configmap camel-amq-fakeapp-props --from-env-file=src/main/resources/application.properties
 
@@ -91,7 +91,3 @@ Updating the DC to make use of the new application.properties
 
 Another option instead of mounting an additional application.properties into the file system would be to inject the parameters from the configMap directly into the deployment configuration as environment variables. This would however requires a container restart to have new values made available to the application.
 
-[WARNING]
-====
-TODO: Sensitive information: amqp.username, amqp.password and amqp.options.transport.trustStorePassword should be moved from the application.properties and injected through environment variables provided by a secret
-====

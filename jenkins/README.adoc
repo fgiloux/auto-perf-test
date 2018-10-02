@@ -1,0 +1,48 @@
+= Jenkins overview
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+ifndef::env-github[]
+:imagesdir: ./
+endif::[]
+:toc:
+:toc-placement!:
+
+This sub-repository aims to describe the setup required for using and configuring Jenking on OpenShift for our purpose, from the extension of the Jenkins base image to its use for running automated performance tests.
+
+== Image extension
+
+Although Jenkins base image could be used as is, it makes sense to extend it with the additional plugins we will use, so that they don't have to be downloaded for each new project.
+
+The way to extend the image using S2I is in https://docs.openshift.com/container-platform/3.10/using_images/other_images/jenkins.html#jenkins-as-s2i-builder[OpenShift documentation].
+
+The main steps for creating a new image using plugins.txt and the plugins directory consist in created an imagestream, a build configuration an launching the image build.
+
+ $ oc create -f openshift/perftest-jenkins-is.yaml
+ $ oc create -f openshift/perftest-jenkins-bc.yaml
+ $ oc start-build perftest-jenkins
+
+== Jenkins deployment
+
+The jenkins-persistent template has been extended and has the persistent volume with JMeter results mounted under /opt/performances. It can be loaded into OpenShift with:
+
+ $ oc create -f openshift/perftest-jenkins-persistent-tm.yaml
+
+Jenkins can then be deployed with
+
+ $ oc process jenkins-persistent NAMESPACE=perftest JENKINS_IMAGE_STREAM_TAG=perftest-jenkins:latest | oc create -f -
+
+== Jenkins pipeline
+
+OpenShift provides nice integration with Jenkins so that a build of type JenkinsPipeline can get created and is automatically loaded into Jenkins as described in https://docs.openshift.com/container-platform/3.10/dev_guide/dev_tutorials/openshift_pipeline.html[OpenShift documentation]. The following two steps deploy and run the pipeline defined in the pipelines directory of this repository.
+
+ $ oc create -f openshift/perftest-pipeline-bc.yaml
+ $ oc start-build perftest-pipeline
+
+The details of the continuous integration pipeline are available in the following chapter:
+
+* <<./pipelines/README.adoc#,Jenkins pipeline>>

@@ -19,7 +19,10 @@ done
 # Call back the webhook step in Jenkins pipeline
 # The name of the test suite pod is provided
 if [ -n "${CALLBACK_URL}" ]; then
-    curl -X POST -d "${HOSTNAME}" "${CALLBACK_URL}"
+    # Workaround for my not working DNS resolution
+    CALLBACK_URL="http://jenkins/webhook-step/$(echo ${CALLBACK_URL} | sed 's/.*\///')"
+    echo " curl -X POST -d ${HOSTNAME} ${CALLBACK_URL}"
+    curl -s -X POST -d "${HOSTNAME}" "${CALLBACK_URL}"
 fi
 
 # An option would be to sleep for a few minutes to give Jenkins the chance to retrieve dashboard files through oc rsync

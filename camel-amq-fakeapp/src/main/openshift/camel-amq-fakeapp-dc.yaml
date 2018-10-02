@@ -60,7 +60,7 @@ spec:
               name: app-broker-jks
               key: amqp.options.transport.trustStorePassword
         - name: JAEGER_SERVICE_NAME
-          value: localhost
+          value: fakeapp
         - name: JAEGER_SAMPLER_PARAM
           value: '1.0'
         - name: JAEGER_PROPAGATION

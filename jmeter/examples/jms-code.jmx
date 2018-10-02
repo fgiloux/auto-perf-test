@@ -180,6 +180,10 @@ def startTime = msg.getLongProperty(&quot;startTime&quot;)
 def txtMsg = msg.asType(TextMessage)
 def txtMsgText = txtMsg.getText()
 log.debug(&quot;### Incoming message:&quot; + txtMsgText + &quot; ###&quot;)
+// def propertyNames = txtMsg.getPropertyNames()
+// while (propertyNames.hasMoreElements()) {
+//     log.debug(&quot;### Property:&quot; + propertyNames.nextElement() + &quot; ###&quot;)
+// }
 def xmlMsg = new XmlSlurper().parseText(txtMsgText)
 def msgId = xmlMsg.CstmrCdtTrfInitn.GrpHdr.MsgId.text().trim()
 log.debug(&quot;### MSG_ID: &quot; + msgId + &quot; ###&quot;)

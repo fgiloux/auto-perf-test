@@ -12,7 +12,7 @@ pipeline {
   } 
   // triggers {
     // Execute the pipeline once a day with automated distribution.
-    // cron('H H * * *)
+    // cron('H H * * *')
   //}
   options {
     timeout(time: 20, unit: 'MINUTES') 
@@ -134,7 +134,7 @@ pipeline {
                           o.metadata.labels['testplan'] = testPlanName
                     }
                     def created = openshift.create(models)
-                    // Block and wait for test completion up to 10msn
+                    // Block and wait for test completion up to 10mns
                     timeout(10) {
                         print "Waiting for tests to complete..."
                         waitForWebhook hook

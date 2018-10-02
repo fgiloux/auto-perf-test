@@ -41,4 +41,6 @@ See the following chapters for details:
 
 * <<./container/README.adoc#,Image creation>>
 * <<./openshift/README.adoc#,Deployment on OpenShift>>
+* <<./observability/README.adoc#,Observability>>
 * <<./examples/README.adoc#,Test examples>>
+
