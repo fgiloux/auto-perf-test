@@ -1,0 +1,89 @@
+= Jenkins pipelines
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+ifndef::env-github[]
+:imagesdir: ./
+endif::[]
+:toc:
+:toc-placement!:
+
+== Creation and run
+
+Loading the pipeline defined in this repository and running it on the jenkins image created <<../README.adoc#,here>> can be done with the following two steps:
+
+ $ oc create -f openshift/perftest-pipeline-bc.yaml
+ $ oc start-build perftest-pipeline
+
+== Pipeline details
+
+=== Trigger
+
+Ideally performance tests would run after ever commit to trunk. They should be part of non-regression testing! It may however not be possible due to the high resource requirement or the length of the tests. In that case on schedule runs is the next best thing.
+
+Like for any build configuration a JenkinsPipeline build can be triggered by a https://docs.openshift.com/container-platform/3.10/dev_guide/builds/triggering_builds.html#webhook-triggers[webhook].
+
+On schedule run can be configured directly in the Jenkins pipeline
+
+ environment {
+   [...]
+   triggers {
+     // Execute the pipeline once a day with automated distribution.
+     cron('H H * * *')
+   }
+   [...]
+ }
+
+A good practice is also to define a timeout for the execution of the pipeline
+
+ options {
+   timeout(time: 20, unit: 'MINUTES')
+ }
+
+=== Delete & recreate
+
+The approach taken in this pipeline is to delete and recreate the test environment including the application image from the project repository each time the tests are to be run. This has several advantages.
+
+* It provides confidence in what is tested is what was intended
+* It ensures a clean state of the environment
+
+=== Execution
+
+A webook is created before the tests are run. This allows to have the pipeline waiting till it receives a call from JMeter notifying that the tests have been run until completion
+
+ def hook = registerWebhook()
+ def callbackUrl = hook.getURL()
+
+This is using the https://wiki.jenkins.io/display/JENKINS/Webhook%2BStep%2BPlugin[webook step plugin] that has been developed by one of my US colleagues, Chris Pitman.
+
+The test plan can be made configurable (number of messages sent, distribution) and environment variables can be passed to the job template being processed to run the same test plan with different conditions. The URL to the previously created webook, the name of job and build numbers are also passed as parameters. The later allows to have the test results stored in subdirectories of the network share per run. The directory structure is as such: `job_name/build_number/testPlanFileName.jtl`.
+For further configuration it is possible to edit the job template from the pipeline before it is processed. This can be used for mounting a secret containing a JKS with other credentials for connecting a different broker for instance.
+
+After completion the entry point script of the JMeter container calls the webhook and the pipeline can resume.                    }
+
+=== Test results
+
+The http://jenkinsci.github.io/performance-plugin/Reporting.html[performance plugin] allows to process among others JMeter results in Jenkins. At the pipeline level it is as simple as calling perfReport. Parameters can be provided to define thresholds that may identify whether the run was successful or not and may set the build result accordingly. Besides the display of graphs of the JMeter results the plugin also allows to compare the current results with the ones of previous runs to get an idea of trends.
+When that's done the pipeline deletes the job.
+
+=== Tagging
+
+After successful test execution the application image can be marked as ready for the next stage.
+
+ stage('tag') {
+    steps {
+       script {
+           openshift.withCluster() {
+               openshift.withProject() {
+                 openshift.tag("camel-amq-fakeapp:latest", "camel-amq-fakeapp:staging")
+               }
+           }
+       }
+    }
+ }
+
+This could also be conditioned to the test result.

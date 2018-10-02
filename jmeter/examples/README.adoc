@@ -1,4 +1,4 @@
-= JMeter overview
+= JMeter examples
 ifdef::env-github[]
 :tip-caption: :bulb:
 :note-caption: :information_source:
@@ -30,6 +30,20 @@ JMeter can be used in GUI mode to create or amend the test plan.
 [IMPORTANT]
 ====
 Certificate location and password may be provided in the connection string. The certificate path may differ. The jks password is injected through an environment variable. This needs to be taken in consideration in the jmx file that is mounted through the configMap. Look at the provided test plan for an example. Note that the run.sh script called when the JMeter container is started transform the J_ to a start parameter with -J as expected by JMeter. For instance when the following environment variable is set: J_JKS_PWD=XXXXX JMeter gets called with -JJKS_PWD and makes possible to get the value in the test plan with ${__P(JKS_PWD)}.
+
+With jms-code.jmx the following variables need to be provided either in user.properties for GUI run or as environment variables with J_ prefix for automated run on OpenShift.
+
+* BROKER: the hostname of the AMQP broker
+* PORT: the port of the AMQP broker
+* JKS_LOCATION: the location of the truststore on the file system
+* JKS_PWD: the password for the truststore
+* PAIN_TEMPLATE_LOCATION: the name and location of the file used as template for creating messages
+* PAIN_SAMPLES_CSV: the name and location of the CSV file containing values to be populated in the messages
+* INFLUXDB_SERVER: the hostname of the InfluxDB server
+* INFLUXDB_PORT: the port of the InfluxDB server
+
+Additional information on InfluxDB in the <<../observability/README.adoc#,Observability>> chapter.
+
 ====
 
 == Run

@@ -24,6 +24,9 @@ import io.opentracing.propagation.TextMap;
 
 public final class CamelHeadersExtractAdapter implements TextMap {
 	
+	// As per the JMS spec, header names must be valid Java identifier part characters.
+	// This means that any header names that contain illegal characters (- for example) should be handled correctly
+	// Opentracing java-jms does it as follows, which is not compatible with the Camel implementation.
 	static final String JMS_DASH = "_$dash$_";
 	 
     private final Map<String, String> map = new HashMap<>();
