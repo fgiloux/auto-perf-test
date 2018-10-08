@@ -1,0 +1,109 @@
+= Application Performance Management
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+ifndef::env-github[]
+:imagesdir: ./
+endif::[]
+:toc:
+:toc-placement!:
+
+For the purpose of this demonstration we are using the https://opentracing.io/[OpenTracing] API with collector and agent provided by the https://www.jaegertracing.io/[Jaeger] implementation.
+The instrumentation is split into sevaral parts:
+
+* a collector, which acts as a data sink
+* an agent in charge of sending application metrics to the sink
+* A frontend for querying data from the sink
+
+== Collector
+
+Deploying an in-memory Jaeger collector can be done with a single command. A production installation would require the use of Cassandra or Elasticsearch for data storage.
+Additional information is available in https://github.com/jaegertracing/jaeger-openshift[jaeger-openshift] repository.
+
+ $ oc process -f https://raw.githubusercontent.com/jaegertracing/jaeger-openshift/master/all-in-one/jaeger-all-in-one-template.yml | oc create -f -
+
+== Agent
+
+The agent can be deployed as a sidecar container. This is handy as this setup will work independent of the language the application is written in. The library deployed with the application will send traces to the localhost using UDP.
+Therefore the following needs to be added to the application deployment configuration under the "containers" section:
+
+----
+- image: openshift/hello-openshift
+          name: myapp
+          ports:
+          - containerPort: 8080
+        - image: jaegertracing/jaeger-agent
+          name: jaeger-agent
+          ports:
+          - containerPort: 5775
+            protocol: UDP
+          - containerPort: 5778
+          - containerPort: 6831
+            protocol: UDP
+          - containerPort: 6832
+            protocol: UDP
+          args:
+          - "--collector.host-port=jaeger-collector.jaeger-infra.svc:14267"
+----
+
+Using jaeger-java-client library we have added the following to the application pom.xml.
+
+----
+<!-- 0.30 matches the dependency in Camel opentracing starter -->
+<jaeger.version>0.30.1</jaeger.version>
+
+<!-- Opentracing -->
+<dependency>
+  <groupId>org.apache.camel</groupId>
+  <artifactId>camel-opentracing-starter</artifactId>
+</dependency>
+<dependency>
+  <groupId>io.jaegertracing</groupId>
+  <artifactId>jaeger-client</artifactId>
+  <version>${jaeger.version}</version>
+</dependency>
+----
+
+The next step is to tell the application to send traces by annotating the Application class with *@CamelOpenTracing* and the Camel OpenTracing implementation does the rest. Events (spans) are captured for incoming and outgoing messages being sent to/from Camel. Logs are also sent and can be seen when the consumer span is expanded.
+
+// No span is created for the components inside the Camel route.... could be a good RFE.
+// Creating a span for the enqueue time could be another.
+
+[NOTE]
+====
+CamelOpenTracing did not translate dashes when setting them into or getting them from JMS headers. This has been fixed with this https://github.com/apache/camel/pull/2540[pull request]. The code with the fix is duplicated in this repository.
+====
+
+Finally the agent can be configured through environment variables set within the deployment configuration:
+
+----
+- name: JAEGER_SERVICE_NAME
+  value: fakeapp
+- name: JAEGER_SAMPLER_PARAM
+  value: '1.0'
+- name: JAEGER_PROPAGATION
+  value: 'jaeger,b3'
+----
+
+The service name identifies the service provided by the application component in the trace. Per default Jaeger will send trace information for one call out of 1000 to limit the burden put on the application. For the sake of this demonstration the environment variable tells Jaeger to do it for every single call. Different formats can be used for trace propagation. Jaeger and b3 are configured here.
+
+[NOTE]
+====
+For Jaeger to be used with the application running locally (outside of OpenShift) a local agent would need to be run to cover the role played by the sidecar container on OpenShift.
+====
+
+== Querying
+
+Jaeger UI has been installed with the collector and a route has been created for reaching it. It can be used to retrieve and display traces and spans.
+
+
+It may also be worth mentioning that enMasse / ActiveMQ arthemis are working on adding OpenTracing support:
+
+* https://issues.apache.org/jira/browse/ARTEMIS-2028
+* ttps://issues.apache.org/jira/browse/DISPATCH-1088
+
+

@@ -12,11 +12,81 @@ endif::[]
 :toc:
 :toc-placement!:
 
-== InfluxDB setup
+== InfluxDB
 
-Deploying InfluxDB on OpenShift...
+Test results are stored in JTL files. It is also possible to have JMeter storing them in an InfluDB database, which can then be queried from Grafana.
 
-== Jaeger
+InfluxDB partner image can be used for deploying it on OpenShift
+
+ $ oc import-image my-influxdata/influxdb-1x --from=registry.connect.redhat.com/influxdata/influxdb-1x --confirm
+
+You may however need to first create credentials for accessing the registry if you haven't done it yet. The instructions https://docs.openshift.com/container-platform/3.10/dev_guide/managing_images.html#allowing-pods-to-reference-images-from-other-secured-registries[here] can be followed for this purpose. Copied bellow for convenience:
+
+ $ docker login registry.connect.redhat.com
+ $ oc create secret generic connect-registry \
+     --from-file=.dockerconfigjson=~/.docker/config.json \
+     --type=kubernetes.io/dockerconfigjson
+
+Use .dockercfg instead of .docker/config.json for older clients.
+
+ $ oc secrets link default connect-registry --for=pull
+
+######################################################## HERE #####################################################
+
+# Add to project and select the newly created imagestream
+A service influxdb-1x has been created
+To connect to it from local JMeter GUI a route has been created: $ oc expose service influxdb-1x
+Jmeter DB to be created in influxDB: 
+	Log into the container and run:
+	$ influx
+	$ show databases
+	$ CREATE DATABASE jmeter
+	$ show databases
+URL configured in JMeter GUI: http://influxdb-1x-perftest.apps.sandbox.com/write?db=jmeter
+env. variable in JMeter DC: J_INFLUXDB_SERVER=influxdb-1x INFLUXDB_PORT=8086
+To check the data:
+$ use jmeter
+$ select * from jmeter
+Grafana installation: Installed with ansible playbook for prometheus metrics:
+ansible-playbook -vvv -i hosts.example39 /usr/share/ansible/openshift-ansible/playbooks/openshift-grafana/config.yml
+- Configured a datasource pointing to our InfluxDB instance:
+URL: http://influxdb-1x.perftest.svc:8086
+Access: Server/proxy (name differently depending on the Grafana version)
+No authentication
+Database: jmeter
+- Created a dashboard
+
+I need to mention the hack I have done in JMeter for calculating the E2E latency:
+- put the message creation time into the JMS header (when available OpenTracing baggage should be used instead)
+- used this value for setting the latency metric
+- I should add to the story that JMSTimestamp is the time the message is handed over to the producer it may not be the time of the send (if queueing or transactions are used on the client side). ActiveMQ (classic) has a plugin to set broker timestamp but it is not recommended for high volume or low latency.
+
+TODO: Have a batch writing into InfluxDB instead of the plugin. And have InfluxDB in the openshift-metric project.
+Explain what has been done in JMeter readme.
+
+IS THAT COMPLICATE TO WRITE A JMETER PLUGIN FOR PROMETHEUS, DOES IT MAKE SENSE? [NOT A PRIORITY]
+It may make sense if we consider that what we provide are metrics, not just events: https://prometheus.io/docs/introduction/comparison/#prometheus-vs.-influxdb
+It would also require the deployment of a Prometheus Gateway.
+https://prometheus.github.io/client_java/io/prometheus/client/exporter/PushGateway.html
+https://github.com/themoosman/openshift-prometheus-pushgateway
+Note: This could also be addressed with Elasticsearch by recording structured logs.
+https://grafana.com/blog/2016/01/05/logs-and-metrics-and-graphs-oh-my/
+
+== OpenTracing
+
+OpenTracing has been deployed and configured for reporting on application performance as described here <<../../observability/opentracing/README.adoc#here>>.
+It makes however sense to add JMeter to the traces as it provides information on how long messages have been enqueued waiting for being picked up and processed by the application.
+
+<<../examples/README.adoc#JMeter example>> jms-code has been extended for this purpose. OpenTracing API, Jaeger and https://github.com/opentracing-contrib/java-jms[java-jms] libraries have been added to the container through the lib directory. The JMeter job template has also been extended to include a sidecar container with the Jaeger agent. It has the unfortunate side effect that the job does not terminate (as the agent does not terminate) at the end of the JMeter test. The Jenkins pipeline takes care of this by deleting the job at the end.
+
+For running the JMeter tests locally the libraries need to be added to the local JMeter installation for running JMeter. For collecting traces sent by the local JMeter instance a local Jaeger collector would need to be set up and environment variables configured.
+
+ $ export JAEGER_ENDPOINT=http://jaeger-collector-perftest.apps.sandbox.com/api/traces
+ $ export JAEGER_TAGS="scope=pertest,span.kind=jmeter"
+ $ export JAEGER_SAMPLER_PARAM=1
+ $ export JAEGER_SERVICE_NAME=jmeter
+
+A route may need to be created for the collector and set as JAEGER_ENDPOINT.
 
 == JMeter configuration
 
