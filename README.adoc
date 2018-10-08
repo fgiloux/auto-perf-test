@@ -21,3 +21,5 @@ Details and instructions on the different aspects can be found here:
 * <<./enmasse/README.adoc#,EnMasse broker>>
 * <<./camel-amq-fakeapp/README.adoc#,Fake application>>
 * <<./jmeter/README.adoc#,JMeter>>
+* <<./jenkins/README.adoc#,Automation with Jenkins>>
+

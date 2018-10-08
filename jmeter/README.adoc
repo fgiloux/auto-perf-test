@@ -26,7 +26,7 @@ The recommended approach is to use JMeter GUI for designing your test plan. You 
 
 Using JMeter GUI for the design phase provides a quick feedback loop. The test plan can then be tweaked till it is deemed ready and can be added to the continuous integration pipeline.
 
-== Orchestration
+== Automation
 
 Although the test plan can be manually run on OpenShift the idea is to get that automated by a tool for continuous integration. This will enable running non-regression tests that also cover performance aspects every time a new version is pushed to the central repository or nightly if resources are constrained during the day. We have used Jenkins for demonstrating how it can be done.
 
