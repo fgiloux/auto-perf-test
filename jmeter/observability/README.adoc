@@ -18,7 +18,7 @@ Test results are stored in JTL files. It is also possible to have JMeter storing
 
 InfluxDB partner image can be used for deploying it on OpenShift
 
- $ oc import-image my-influxdata/influxdb-1x --from=registry.connect.redhat.com/influxdata/influxdb-1x --confirm
+ $ ooc import-image my-influxdata/influxdb-1x --from=registry.connect.redhat.com/influxdata/influxdb-1x --confirm
 
 You may however need to first create credentials for accessing the registry if you haven't done it yet. The instructions https://docs.openshift.com/container-platform/3.10/dev_guide/managing_images.html#allowing-pods-to-reference-images-from-other-secured-registries[here] can be followed for this purpose. Copied bellow for convenience:
 
@@ -31,46 +31,69 @@ Use .dockercfg instead of .docker/config.json for older clients.
 
  $ oc secrets link default connect-registry --for=pull
 
-######################################################## HERE #####################################################
+The next step is to deploy InfluxDB on OpenShift.
+This can be done through the web console by clicking "Add to project", choosing "Deploy Image" and then selecting the project name, influxdb-1x and latest. Alternatively `$ oc new-app influxdb-1x` can be used for the same purpose.
 
-# Add to project and select the newly created imagestream
-A service influxdb-1x has been created
-To connect to it from local JMeter GUI a route has been created: $ oc expose service influxdb-1x
-Jmeter DB to be created in influxDB: 
-	Log into the container and run:
-	$ influx
-	$ show databases
-	$ CREATE DATABASE jmeter
-	$ show databases
-URL configured in JMeter GUI: http://influxdb-1x-perftest.apps.sandbox.com/write?db=jmeter
-env. variable in JMeter DC: J_INFLUXDB_SERVER=influxdb-1x INFLUXDB_PORT=8086
-To check the data:
-$ use jmeter
-$ select * from jmeter
-Grafana installation: Installed with ansible playbook for prometheus metrics:
-ansible-playbook -vvv -i hosts.example39 /usr/share/ansible/openshift-ansible/playbooks/openshift-grafana/config.yml
-- Configured a datasource pointing to our InfluxDB instance:
-URL: http://influxdb-1x.perftest.svc:8086
-Access: Server/proxy (name differently depending on the Grafana version)
-No authentication
-Database: jmeter
-- Created a dashboard
+A service influxdb-1x has been created. A route can be created to connect to it from a local JMeter
 
-I need to mention the hack I have done in JMeter for calculating the E2E latency:
-- put the message creation time into the JMS header (when available OpenTracing baggage should be used instead)
-- used this value for setting the latency metric
-- I should add to the story that JMSTimestamp is the time the message is handed over to the producer it may not be the time of the send (if queueing or transactions are used on the client side). ActiveMQ (classic) has a plugin to set broker timestamp but it is not recommended for high volume or low latency.
+ $ oc expose service influxdb-1x
 
-TODO: Have a batch writing into InfluxDB instead of the plugin. And have InfluxDB in the openshift-metric project.
-Explain what has been done in JMeter readme.
+Now that InfluxDB is available and accessible a database instance is to be created for JMeter.
 
-IS THAT COMPLICATE TO WRITE A JMETER PLUGIN FOR PROMETHEUS, DOES IT MAKE SENSE? [NOT A PRIORITY]
-It may make sense if we consider that what we provide are metrics, not just events: https://prometheus.io/docs/introduction/comparison/#prometheus-vs.-influxdb
-It would also require the deployment of a Prometheus Gateway.
-https://prometheus.github.io/client_java/io/prometheus/client/exporter/PushGateway.html
-https://github.com/themoosman/openshift-prometheus-pushgateway
-Note: This could also be addressed with Elasticsearch by recording structured logs.
-https://grafana.com/blog/2016/01/05/logs-and-metrics-and-graphs-oh-my/
+Use `oc rsh` to log into the container and run the following commands.
+
+ $ influx
+ $ show databases
+ $ CREATE DATABASE jmeter
+ $ show databases
+
+You should see your newly added jmeter database.
+
+To connect to InfluxDB from JMeter user defined variables have been configured in the JMeter test plan:
+
+ influxdb_server: ${__P(INFLUXDB_SERVER,influxdb-1x-perftest.apps.sandbox.com)}
+ influxdb_port: ${__P(INFLUXDB_PORT,80)}
+
+where influxdb-1x-perftest.apps.sandbox.com is my route, which gets used as default when the JMeter system property is not set.
+
+The JMeter pod will connect to InfluxDB directly through the service and the environment variables have been set as follows
+
+ J_INFLUXDB_SERVER=influxdb-1x
+ J_INFLUXDB_PORT=8086
+
+Finally an InfluxDB backend listener has been added to the test plan. Look at the jms-code.jmx example for further details.
+
+To check that data gets populated when the test plan is run you can log into the InfluxDB container again and run:
+
+ $ use jmeter
+ $ select * from jmeter
+
+*Alternative*
+
+There is a https://github.com/johrstrom/jmeter-prometheus-plugin[plugin] allowing the JMeter results to be exported to Prometheus instead of InfluxDB. This has not been further investigated as part of this demo as InfluxDB seems to be a good match and has broader adoption for this use case.
+
+== Grafana
+
+Now that we have data available we need something to get value out of it. Grafana is best for that.
+
+The installation of Grafana is covered <<../../observability/grafana/README.adoc#here>>.
+
+In Grafana we need first to configure a datasource pointing to our InfluxDB instance. This can be done by setting the following values.
+
+ URL: http://influxdb-1x.perftest.svc:8086
+ Access: Server/proxy (named differently depending on the Grafana version)
+ No authentication
+ Database: jmeter
+
+The last step is to create a dashboard. Therefore an example is available under observability/grafana.
+
+WARNING: 1. The current version of the JMeter test plan calculates the latency by substracting the timestamp set by the application sender to the time the initial message was created by the JMeter thread. This provides more meaningful information when components are chained through a messaging layer. The default JMeter calculation would just report the time required to put and read messages from the broker. The time of creation for the first message is passed directly into the JMS headers. It would be a better solution to use the baggage mechanism in OpenTracing for this mechanism as it would also work when other transports than messaging are taking part in the chain.
+
+WARNING: 2. The JMS timestamp is used as best approximation of when the message has been delivered to the broker. It is actually the time the message was handed over to the producer. This may be quite different when transactions or other mechanisms are used that batch messages.
+
+// ActiveMQ (classic) has a plugin to set broker timestamp but it is not recommended for high volume or low latency.
+
+NOTE: TODO: A JSR223 sampler could be used instead of the backend plugin to write into InfluxDB. This would provide flexibility on the information, which is stored and available for reporting.
 
 == OpenTracing
 
@@ -88,22 +111,20 @@ For running the JMeter tests locally the libraries need to be added to the local
 
 A route may need to be created for the collector and set as JAEGER_ENDPOINT.
 
-== JMeter configuration
+== Observability of JMeter
 
-*Possible extension*
+It is important to monitor the behavior of JMeter itself. To provide meaningful results it should not be the bottleneck. The good thing with having it running on OpenShift is that it is easy to scale it vertically or horizontally.
 
-*Alternatives*
+This is not covered here but it may make sense to monitor JMeter using Prometheus to make sure that the JMeter instances were not over heated during the tests. As JMeter instances may come and go when the tests are launched and terminate (that's a good thing for freeing up resources) a Prometheus https://github.com/prometheus/pushgateway[pushgateway] may be used for metrics collection.
 
-== Prometheus
+If Jmeter were to run over capacity your tests may suffer from http://highscalability.com/blog/2015/10/5/your-load-generator-is-probably-lying-to-you-take-the-red-pi.html[coordinated omission].
+This demo aims at validating application (not broker) performance/behavior and with this in mind I am making the following assumptions:
 
-== Grafana
+* JMeter is able to produce the load requested (confer the scalability statement above)
+* The broker is able to ingest the messages in a timely fashion (not blocking JMeter) and preventing the point above.
+* The latency introduced by the broker is to be considered together with the application. Tuning the way the messages are fetches by the application can impact it significantly.
 
-JMeter dashboard.
+== Jenkins
 
-[WARNING]
-====
-TODO: To be written
-====
-
-
-
+The test results can be graphed, displayed and interpreted (FAIL OR PASS) in Jenkins thanks to the performance plugin.
+This is described <<../../jenkins/pipelines/README.adoc#here>>.
