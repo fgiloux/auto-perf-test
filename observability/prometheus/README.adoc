@@ -1,0 +1,60 @@
+= Prometheus
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+ifndef::env-github[]
+:imagesdir: ./
+endif::[]
+:toc:
+:toc-placement!:
+
+== Installation
+
+A playbook is available for deploying Prometheus on the machine used for the OpenShift installation:
+
+ $ ansible-playbook -vvv -i your.inventory /usr/share/ansible/openshift-ansible/playbooks/openshift-prometheus/config.yml
+
+Alternatively, the ansible playbook broker can be used for installinng Prometheus together with Grafana, see https://github.com/ansibleplaybookbundle/prometheus-apb[here].
+
+NOTE:  Things are evolving quickly in this realm and an operator, configurable during the ansible installation is available with OpenShift 3.11 for installing and managing Prometheus & Grafana. 
+
+== Instrumentation
+
+The Fabric8 S2I image (fabric8/s2i-java), which is used among others by https://access.redhat.com/documentation/en-us/red_hat_fuse/7.0/html/managing_fuse/prometheus[Fuse] handily comes with support for exporting metrics to Prometheus. Among others it has a Prometheus exporter agent, which is started with the application and expose metrics to be scrapped. The java process is started with `-javaagent:/opt/prometheus/jmx_prometheus_javaagent.jar=9779:/opt/prometheus/prometheus-config.yml` where prometheus-config.yml already includes all the Camel metrics. You can use the S2I capabilites of the image to add your own metrics. More information https://access.redhat.com/documentation/en-us/red_hat_fuse/7.0/html/managing_fuse/prometheus#configuring_prometheus[here].
+
+A service exposing the prometheus port (9779) needs to created with the following annotations:
+
+ apiVersion: v1
+ kind: Service
+ metadata:
+   annotations:
+     prometheus.io/port: '9779'
+     prometheus.io/scheme: http
+     prometheus.io/scrape: 'true'
+
+Finally the prometheus configmap in the openshift-metrics project may need to be amended with the following lines:
+
+ # Scrape config for camel-amq-fakeapp
+ - job_name: 'camel-amq-fakeapp'
+   kubernetes_sd_configs:
+   - role: endpoints
+     namespaces:
+       names:
+       - perftest
+ 
+   relabel_configs:
+   - source_labels: [__meta_kubernetes_service_name]
+     action: keep
+     regex: camel-amq-fakeapp
+   - source_labels: [__meta_kubernetes_pod_container_port_name]
+     action: keep
+     regex: prometheus
+
+== Dashboards
+
+See <<../grafana/README.adoc#,Dashboards>> for information on using Grafana to query and display metrics.
+

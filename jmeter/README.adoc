@@ -16,7 +16,7 @@ This sub-repository aims to describe the setup required for using JMeter on Open
 
 [WARNING]
 ====
-TODO: Test result dashboard and analysis
+TODO: To add test results dashboard and analysis
 ====
 
 == Design time
@@ -30,10 +30,7 @@ Using JMeter GUI for the design phase provides a quick feedback loop. The test p
 
 Although the test plan can be manually run on OpenShift the idea is to get that automated by a tool for continuous integration. This will enable running non-regression tests that also cover performance aspects every time a new version is pushed to the central repository or nightly if resources are constrained during the day. We have used Jenkins for demonstrating how it can be done.
 
-[WARNING]
-====
-TODO: Add link to the Jenkins chapter
-====
+See: <<../jenkins/README.adoc#,Jenkins>>
 
 == Next
 

@@ -22,4 +22,5 @@ Details and instructions on the different aspects can be found here:
 * <<./camel-amq-fakeapp/README.adoc#,Fake application>>
 * <<./jmeter/README.adoc#,JMeter>>
 * <<./jenkins/README.adoc#,Automation with Jenkins>>
+* <<./observability/README.adoc#,Observability>>
 
