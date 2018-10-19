@@ -16,6 +16,8 @@ This repository aims to demonstrate how OpenShift and other tools can be leverag
 
 The current setup covers components that communicate asynchronously through a message broker.
 
+This was tested with OpenShift 3.9 and 3.10 but may work with other versions as well.
+
 Details and instructions on the different aspects can be found here:
 
 * <<./enmasse/README.adoc#,EnMasse broker>>
