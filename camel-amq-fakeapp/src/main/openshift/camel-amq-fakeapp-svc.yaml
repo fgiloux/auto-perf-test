@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    fabric8.io/git-branch: master
+    fabric8.io/git-commit: 9a41048f1170bcf792cfdfa8f7059e788b018518
+    fabric8.io/iconUrl: img/icons/camel.svg
+    prometheus.io/port: "9779"
+    prometheus.io/scrape: "true"
+  creationTimestamp: null
+  labels:
+    app: camel-amq-fakeapp
+    expose: "true"
+    group: org.fgiloux.sandbox
+    provider: fabric8
+    version: 1.0-SNAPSHOT
+  name: camel-amq-fakeapp
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  - name: prometheus
+    port: 9779
+    protocol: TCP
+    targetPort: 9779
+  selector:
+    app: camel-amq-fakeapp
+    group: org.fgiloux.sandbox
+    provider: fabric8
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
