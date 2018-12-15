@@ -32,10 +32,6 @@ The agent can be deployed as a sidecar container. This is handy as this setup wi
 Therefore the following needs to be added to the application deployment configuration under the "containers" section:
 
 ----
-- image: openshift/hello-openshift
-          name: myapp
-          ports:
-          - containerPort: 8080
         - image: jaegertracing/jaeger-agent
           name: jaeger-agent
           ports:
