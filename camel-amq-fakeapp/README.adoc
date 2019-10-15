@@ -35,8 +35,15 @@ Failure injection may be added with a future version.
 The container image can easily be build with the fabric8 build target, which uses the S2I strategy provided you are connected to OpenShift. Once you have cloned the git repository execute the following commands:
 
  $ cd auto-perf-test/camel-amq-fakeapp
+ Change amqp.host in the following file
+ camel-amq-fakeapp/src/main/openshift/camel-amq-fakeapp-props-cm.yaml
+ camel-amq-fakeapp/src/main/resources/application.properties
+
+ Create certificate as described below in section as prerequisite.
+ make sure amqp.options.transport.trustStoreLocation is correct camel-amq-fakeapp/src/main/resources/application.properties
+
  $ oc login
- $ mvn fabric8:build
+ $ mvn package fabric8:build
 
 == Deployment
 
@@ -77,6 +84,7 @@ The secret can then be mounted in the container by updating the deployment confi
 You may have noted that the openshift directory in the git repository also contains a configMap. This configMap is used for externalising environment dependent properties that are injected into the Spring Boot application through application.properties. Defaults can be defined in the property file provided with the application archive (jar). Only properties whose values should be overwritten can be specified in the ConfigMap. This works as Spring Boot will privilege values defined externally to the ones defined in application.properties embedded in the jar. *You will have to change the "amqp.host" propery with the name of your own broker*. Here are the steps that have been used afterwards. Alternatively you can use the "oc create -f" command provided earlier.
 
  $ oc create configmap camel-amq-fakeapp-props --from-env-file=src/main/resources/application.properties
+ oc create -f src/main/openshift/camel-amq-fakeapp-props-cm.yaml
 
  application.properties is a streamlined version only including values that differ from the ones embedded in the jar.
 
